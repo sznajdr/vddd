@@ -78,6 +78,12 @@ yield:
 # module defaults to be tuned in §7 calibration; they are NOT physics and NOT OD-1x evidence-gated.
 m1_shots:
   cut_thresh: {value: 0.5, used_in: "TransNetV2 transition probability -> cut (research 03)"}
+  hist_cut_dist: {value: 0.08, used_in: "second cut signal: normalised colour-histogram L1 distance between consecutive frames"}
+  cut_diff_floor: {value: 0.02, used_in: "FrameDiffCutDetector: absolute floor on the mean frame difference (fraction of 255)"}
+  cut_diff_ratio: {value: 4.0, used_in: "FrameDiffCutDetector: spike over the running median difference that declares a cut"}
+  cut_window_s: {value: 1.0, used_in: "running-median window for the adaptive cut threshold"}
+  type_conf_min: {value: 0.6, used_in: "shot-type classifier confidence below which the shot is `other` (not charted)"}
+  replay_dup_fraction_min: {value: 0.35, used_in: "duplicate-frame fraction above which a wide-pan-looking shot is `replay_insert` (EC-07)"}
   type_margin_min: {value: 0.10, used_in: "CLIP top-1 vs top-2 margin below which shot type -> other"}
   min_shot_s: {value: 0.5, used_in: "shots shorter than this merge into neighbours before typing"}
   static_region_frames: {value: 75, used_in: "frames over which a pixel must be unchanged to count as graphic overlay"}

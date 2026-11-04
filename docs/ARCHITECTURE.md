@@ -9,13 +9,13 @@ replay + metadata
  M0 ingest ──────────── metadata rules + ffmpeg video normalization IMPLEMENTED
       │
       ▼
- M1 shots ───────────── stub (needs OD-1x shot labels)            ─┐
+ M1 shots ───────────── scaffold IMPLEMENTED (synthetic broadcast) ─┐
       │                                                             │ G-1
       ▼                                                             │
  M2 detect ──────────── stub (needs golden manifest for holdout)   ─┘
       │
       ▼
- M3 track + seeding ─── EC-12 arithmetic IMPLEMENTED · checks/tool stubs   ─┐ G-2
+ M3 track + seeding ─── checks + live seeding loop IMPLEMENTED             ─┐ G-2
       │                                                                     │
       ▼                                                                     │
  M4 geometry ────────── tiering + cover + axis projection IMPLEMENTED       ─┘
@@ -27,7 +27,7 @@ replay + metadata
  M6 events ──────────── positions_lost + UNCALIBRATED reference detector IMPLEMENTED
       │
       ▼
- M7 QC ──────────────── gates + yield + SHOT_GAP + coverage IMPLEMENTED · runner_qc stub
+ M7 QC ──────────────── gates + yield + SHOT_GAP + coverage + runner QC IMPLEMENTED
       │
       ▼
  M8 storage ─────────── canonical export + SQLite store IMPLEMENTED

@@ -1,6 +1,6 @@
 # M7 — QC & Coverage
 
-**Spec:** §10, §6.2–6.3; ledger L-29…L-32, L-41; D-11, D-28, D-35. **Status:** gate logic, per-stratum yield, `SHOT_GAP` emission and coverage fractions implemented and tested; runner QC (visible/stateable fractions, terminal handling) still to build on M4/M5 outputs.
+**Spec:** §10, §6.2–6.3; ledger L-29…L-32, L-41; D-11, D-28, D-35. **Status:** gate logic, per-stratum yield, `SHOT_GAP` emission, coverage fractions and runner QC (visible/stateable fractions overall and final third, EC-03 terminal denominators with NULL final-third fractions, occlusion counts, DR-11 realization tag) implemented and tested.
 
 | | |
 |---|---|
