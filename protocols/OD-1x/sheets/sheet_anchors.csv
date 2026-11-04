@@ -1,0 +1,2 @@
+race_id,start_type,pass_no,t0_video_s,tend_video_s,first_past_saddle_no,official_elapsed_norm_s,recall_suspected,notes
+# residual = (tend_video_s - t0_video_s) - official_elapsed_norm_s is computed by tools/instantiate_eg.py

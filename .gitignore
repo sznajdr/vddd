@@ -1,0 +1,16 @@
+data/*
+!data/README.md
+!data/.gitkeep
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+.venv/
+*.mp4
+*.mkv
+*.parquet
+*.sqlite
+*.db
+.ruff_cache/

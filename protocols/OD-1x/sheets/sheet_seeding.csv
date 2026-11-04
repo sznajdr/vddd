@@ -1,0 +1,2 @@
+race_id,attempt,frame_kind,video_timecode_s,seconds_elapsed,n_assigned,n_unassigned,n_wrong_after_check,id_cues,notes
+# attempt: 1 = first stable wide-pan frame after start; 2 = mid-race re-seed. id_cues: cloth|silks|driver|position (semicolon-separated)

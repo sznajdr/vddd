@@ -1,0 +1,45 @@
+# Kill-gates (RECON §8; D-33). Content of draft §0.4.
+# Evaluated after OD-1x + the 5-race throwaway pilot (RP-2 exemption).
+# tools/freeze_check.py requires every gate to carry status: pass before promotion.
+# status in {not_evaluated, pass, recalibrate_once, fail}
+
+gates:
+  - id: KG-1
+    name: seeding time
+    rule: "median seeding time (first stable wide-pan frame -> all saddle numbers assigned) > 8 min"
+    on_trigger: "stop; reconsider CV against pure hand-charting / text-parse"
+    threshold_min: 8
+    status: not_evaluated
+    measured: null
+    evidence: null
+  - id: KG-2
+    name: tier agreement
+    rule: "M4 tier agreement < 0.85 on pilot hand-labelled frames"
+    on_trigger: "recalibrate once; still failing -> stop"
+    threshold: 0.85
+    status: not_evaluated
+    measured: null
+    evidence: null
+  - id: KG-3
+    name: pilot yield
+    rule: "pilot chartable yield < 40%"
+    on_trigger: "gate review before any further charting"
+    threshold: 0.40
+    status: not_evaluated
+    measured: null
+    evidence: null
+  - id: KG-4
+    name: anchor residual spread
+    rule: "post-offset anchor residual spread > 2 x provisional tolerance on either start type"
+    on_trigger: "EC-12 design review before freeze"
+    threshold_factor: 2.0
+    status: not_evaluated
+    measured: null
+    evidence: null
+  - id: KG-5
+    name: signal gate (RP-7, project-level, not a spec gate)
+    rule: "notule trip phrases from prior races show no detectable edge vs closing odds on the owner's corpus"
+    on_trigger: "stop or reframe before P4; the pipeline would be measuring something the market already prices"
+    status: not_evaluated
+    measured: null
+    evidence: null

@@ -1,0 +1,68 @@
+# Threshold set TS-0.0.0-provisional — SPEC-2.0.0-draft §7.1
+# This is NOT a calibrated set. Values are the spec's initial defaults.
+# `eg: true` = evidence-gated: provisional until spec/registers/evidence_gated.yaml instantiates it.
+# Modules read values through tripstate.config.ThresholdSet; never import numbers from here directly.
+
+threshold_set_version: TS-0.0.0-provisional
+spec_version: 2.0.0-draft
+calibrated: false
+search_provenance: null
+
+geometry:
+  sw_ratio: {value: 0.35, eg: true, used_in: "§2.1 (RP-5: may become per-shot)"}
+  motion_window_s: {value: 0.4, used_in: "§3.1"}
+  same_tier_sw: {value: 0.6, eg: true, used_in: "§2.2"}
+  max_tier_span_sw: {value: 1.2, eg: true, used_in: "§2.2 (L-10)"}
+  rail_lane_center_offset_sw: {value: 0.5, used_in: "§2.2"}
+  rail_attach_sw: {value: 1.0, used_in: "§2.2 / EC-13"}
+  rank_tie_sl: {value: 0.10, used_in: "§2.2 / §2.3"}
+  cover_min_sl: {value: 0.3, used_in: "§2.2"}
+  cover_max_sl: {value: 2.0, used_in: "§2.2"}
+  cover_lat_sw: {value: 0.8, eg: true, used_in: "§2.2 (L-11, D-26)"}
+  detach_sl: {value: 6.0, used_in: "§2.4 (value unchanged; OD-1x only confirms rarity, see detach_sl_prevalence)"}
+
+smoothing:
+  min_state_s: {value: 1.0, used_in: "§3.4"}
+  tier_hysteresis_s: {value: 0.6, used_in: "§3.4"}
+
+confidence:
+  min_state_conf: {value: 0.3, used_in: "§2.3"}
+  ok_state_conf: {value: 0.6, used_in: "§2.4"}
+
+events:
+  recover_window_s: {value: 5.0, used_in: "§2.5"}
+  break_match_tolerance_s: {value: 2.0, used_in: "§6.2 / M6"}
+
+anchors:
+  anchor_offset_volte_s: {value: 0.0, eg: true, used_in: "EC-12 (D-34)"}
+  anchor_offset_autostart_s: {value: 0.0, eg: true, used_in: "EC-12 (D-34)"}
+  anchor_tol_volte_s: {value: 2.0, eg: true, used_in: "EC-12 (D-34)"}
+  anchor_tol_autostart_s: {value: 2.0, eg: true, used_in: "EC-12 (D-34)"}
+  finish_evidence_min_k: {value: 3, eg: true, used_in: "M3 DoD (a) rung ii (D-30)"}
+
+ingest:
+  normalized_fps: {value: 25.0, eg: true, used_in: "M0"}
+  time_unit_consistency_tol_s: {value: 0.5, used_in: "M0 rule 4"}
+  plausible_km_rate_min_s: {value: 65, used_in: "M0 rule 4 (S-5: 55 -> 65)"}
+  plausible_km_rate_max_s: {value: 110, used_in: "M0 rule 4"}
+
+phases:
+  early_phase_end: {value: 0.30, used_in: "§2.6"}
+  late_phase_start: {value: 0.72, used_in: "§2.6"}
+
+qc:
+  coverage_race_min: {value: 0.65, eg: true, used_in: "Q-1"}
+  coverage_final_third_min: {value: 0.70, eg: true, used_in: "Q-2"}
+  graphic_occlusion_max: {value: 0.15, used_in: "Q-5 / EC-06"}
+  occl_max_s: {value: 1.5, used_in: "EC-08"}
+  human_budget_cap_min: {value: 8, eg: true, used_in: "Q-7 (D-29)"}
+  max_field_size: {value: 14, used_in: "Q-6 (D-06)"}
+
+yield:
+  stratum_yield_review_factor: {value: 0.5, eg: true, used_in: "§6.2 per-stratum chartable trigger (D-35)"}
+
+# Module-defined namespaces (populated when the module is built; must exist before acceptance, §7.1):
+m1_shots: {}
+m2_detect: {}
+m3_track: {}
+m6_events: {}

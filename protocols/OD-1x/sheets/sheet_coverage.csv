@@ -1,0 +1,2 @@
+race_id,shot_seq,shot_type,t_start_video_s,t_end_video_s,graphic_over_runners,notes
+# shot_type in {wide_pan,head_on,tight,replay_insert,graphic_fullscreen,other}; graphic_over_runners in {0,1}

@@ -1,0 +1,12 @@
+# M8 — Storage & Versioning
+
+**Spec:** §9, §4 M8; ledger L-37…L-40; D-13, D-32. **Status:** canonical export implemented and tested; store stubbed; DDL drafted in `../schema/ddl.sql`.
+
+| | |
+|---|---|
+| Input | All module outputs. |
+| Output | SQLite + parquet sidecars; export views; canonical JSONL per table. |
+| Acceptance | Round-trip integrity; canonical export byte-identical under same inputs/versions; two extractor versions coexist. |
+| DoD | Schema-additive migration = minor; breaking = major; default views join `chartable = true`. |
+
+Quantization (L-39): `_frac` 6 dp, `_s` 3 dp, `_sl`/`_sw`/`conf` 4 dp. Applied only in the export.
