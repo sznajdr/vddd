@@ -25,8 +25,8 @@ synth-demo:
 
 pilot-demo:
 	rm -rf /tmp/tripstate-pilot-demo && python tools/synth_video.py --out /tmp/tripstate-pilot-demo/synth --duration 8
-	python tools/seed_cli.py /tmp/tripstate-pilot-demo/synth/synth.mp4 --race SYNTH-1 --out /tmp/tripstate-pilot-demo/session --script /tmp/tripstate-pilot-demo/synth/seed_script.json
-	python tools/pilot_run.py --video /tmp/tripstate-pilot-demo/synth/synth.mp4 --race SYNTH-1 --race-json /tmp/tripstate-pilot-demo/synth/race.json --session /tmp/tripstate-pilot-demo/session/session.json --truth /tmp/tripstate-pilot-demo/synth/synth.mp4.truth.json --tier-labels /tmp/tripstate-pilot-demo/synth/tier_labels.csv --path seeded --propagator oracle --human-minutes 4.0 --out /tmp/tripstate-pilot-demo/pilot5/SYNTH-1
+	python tools/seed_cli.py /tmp/tripstate-pilot-demo/synth/synth.mp4 --race SYNTH-1 --out /tmp/tripstate-pilot-demo/session --script /tmp/tripstate-pilot-demo/synth/seed_script.json --engine oracle --truth /tmp/tripstate-pilot-demo/synth/synth.mp4.truth.json
+	python tools/pilot_run.py --video /tmp/tripstate-pilot-demo/synth/synth.mp4 --race SYNTH-1 --race-json /tmp/tripstate-pilot-demo/synth/race.json --session /tmp/tripstate-pilot-demo/session/session.json --truth /tmp/tripstate-pilot-demo/synth/synth.mp4.truth.json --tier-labels /tmp/tripstate-pilot-demo/synth/tier_labels.csv --path seeded --propagator session --human-minutes 4.0 --out /tmp/tripstate-pilot-demo/pilot5/SYNTH-1
 	python tools/pilot_run.py --video /tmp/tripstate-pilot-demo/synth/synth.mp4 --race SYNTH-1 --race-json /tmp/tripstate-pilot-demo/synth/race.json --session /tmp/tripstate-pilot-demo/session/session.json --truth /tmp/tripstate-pilot-demo/synth/synth.mp4.truth.json --tier-labels /tmp/tripstate-pilot-demo/synth/tier_labels.csv --path detector --detector oracle --human-minutes 4.0 --out /tmp/tripstate-pilot-demo/pilot5/SYNTH-1
 	python tools/pilot_report.py --reports '/tmp/tripstate-pilot-demo/pilot5/SYNTH-1/report_*.json' --md /tmp/tripstate-pilot-demo/pilot5/pilot_report.md
 

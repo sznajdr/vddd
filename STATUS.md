@@ -50,6 +50,7 @@ _Last updated: 2026-11-04 (agent scaffold, research pack, P1 draft cut)._ Update
 - [x] M6 uncalibrated reference detector; golden manifest tool (§6.1, S-6); BORIS→hand_charts converter (RP-17)
 - [x] CI workflow, `tripstate` CLI (`ingest-video`, `synth-demo`, `evaluate`), audit fixes (`docs/AUDIT.md`)
 - [x] Seeding tool: `SeedingSession` state machine (keymap, auto-slowdown at flags, anchors, orientation, break review, first-past, recall, human-minutes) + `tools/seed_cli.py` (OpenCV window / headless script)
+- [x] Live seeding loop (`tripstate.seeding.live`): oracle / detector / SAM 2 engines, `FlagMonitor`, pause-on-flag, re-seed prompts, session timeline → `pilot_run.py --propagator session`
 - [x] Throwaway pilot stack (`tripstate.pilot`): ffmpeg frame source, synthetic video renderer, oracle + blob detectors, IoU tracker, seed→track assignment with flags, oracle + SAM 2 propagators, IDF1/IDSW/MOTA-lite, race runner → report, kill-gate aggregation; `tools/synth_video.py`, `pilot_run.py`, `pilot_report.py`; `make pilot-demo` runs the loop on synthetic video
 
 ## Research pack (2026-11-04)

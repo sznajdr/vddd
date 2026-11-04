@@ -112,6 +112,8 @@ class SeedingSession:
         self.finished_at: float | None = None
         self.messages: list[str] = []
         self.headless = False   # set by scripted replays: wall-clock figures are then meaningless
+        self.engine = None      # LiveEngine (tripstate.seeding.live); None = seeds only
+        self.monitor = None     # FlagMonitor
 
     # ---- helpers ---------------------------------------------------------------------------
     @property
@@ -153,6 +155,50 @@ class SeedingSession:
         bands = ", ".join(f"{b} m: {n} runners" for b, n in sorted(self.rendement_bands.items())) or "flat"
         return f"volte ({self.start_format}): t_0 = FINAL release into racing direction; bands {bands}"
 
+    # ---- live engine ----------------------------------------------------------------------
+    def attach(self, engine, monitor) -> None:
+        self.engine, self.monitor = engine, monitor
+        self._observe()
+
+    def add_flag(self, flag: Flag) -> None:
+        """A flag raised at or behind the playhead pauses playback now; one ahead is handled by tick()."""
+        self.flags.append(flag)
+        if flag.frame <= self.index and not flag.resolved:
+            self.playing = False
+            self._say(f"flag {flag.kind} at frame {flag.frame}" + (f" (runner {flag.saddle_no})" if flag.saddle_no else "") + f": {flag.note}")
+
+    def _observe(self) -> None:
+        """Advance the engine to the playhead and run the monitor on the frames it just produced.
+        A new flag parks the playhead on the flag's frame (the remaining frames are observed on
+        resume); a `lost` runner whose box comes back resolves its own flag (EC-08 re-match)."""
+        if self.engine is None:
+            return
+        start = getattr(self, "_observed", -1) + 1
+        for f in range(start, self.index + 1):
+            boxes = self.engine.step(f)
+            for fl in self.flags:
+                if not fl.resolved and fl.kind == "lost" and fl.saddle_no in boxes and boxes[fl.saddle_no].conf >= (self.monitor.conf_thr if self.monitor else 0.5):
+                    fl.resolved = True
+                    self._say(f"runner {fl.saddle_no} back at frame {f}")
+            new = self.monitor.update(f, boxes, self.engine.anonymous_at(f)) if self.monitor is not None else []
+            for fl in new:
+                self.add_flag(fl)
+            if new and f < self.index:
+                self.index = f
+                self._observed = f
+                return
+        self._observed = max(getattr(self, "_observed", -1), self.index)
+
+    def set_index(self, i: int) -> None:
+        self.index = max(0, min(self.n_frames - 1, i))
+        self._observe()
+
+    def current_boxes(self) -> dict:
+        """For the window: identified boxes {saddle: ObjBox} and anonymous tracklets {track_id: box}."""
+        if self.engine is None:
+            return {"identified": {}, "anonymous": {}}
+        return {"identified": self.engine.boxes_at(self.index), "anonymous": self.engine.anonymous_at(self.index)}
+
     # ---- playback -------------------------------------------------------------------------
     def tick(self) -> None:
         """Advance one UI tick while playing: `speed` frames, capped to 1x near an unresolved flag
@@ -171,13 +217,14 @@ class SeedingSession:
         self.index = nxt
         if self.index >= self.n_frames - 1:
             self.playing = False
+        self._observe()
 
     def _jump_flag(self, direction: int) -> None:
         fl = sorted(self.unresolved_flags(), key=lambda f: f.frame)
         cands = [f for f in fl if (f.frame > self.index if direction > 0 else f.frame < self.index)]
         if cands:
             target = cands[0] if direction > 0 else cands[-1]
-            self.index = target.frame
+            self.set_index(target.frame)
             self.playing = False
 
     # ---- input ----------------------------------------------------------------------------
@@ -207,10 +254,10 @@ class SeedingSession:
         self._log("play" if self.playing else "pause")
 
     def _do_step_back(self) -> None:
-        self.index = max(0, self.index - 1); self.playing = False
+        self.playing = False; self.set_index(self.index - 1)
 
     def _do_step_fwd(self) -> None:
-        self.index = min(self.n_frames - 1, self.index + 1); self.playing = False
+        self.playing = False; self.set_index(self.index + 1)
 
     def _do_prev_flag(self) -> None:
         self._jump_flag(-1)
@@ -283,10 +330,20 @@ class SeedingSession:
             x, y = self.pending_click
             kind = "human_correction" if any(s.saddle_no == n for s in self.seeds) else "human_seed"
             self.seeds.append(Seed(self.index, self.t_s, n, x, y, kind))
+            bound = True
+            if self.engine is not None:
+                bound = bool(self.engine.add_prompt(self.index, n, x, y))
+                if self.monitor is not None:
+                    self.monitor.note_prompt(self.index, n)
+                if not bound:
+                    self._say(f"seed {n}: nothing under the click at frame {self.index}")
             for f in self.flags:
                 if not f.resolved and f.frame <= self.index and (f.saddle_no in (None, n)):
                     f.resolved = True
-            self._log("seed", saddle_no=n, kind=kind, x=x, y=y)
+            self._log("seed", saddle_no=n, kind=kind, x=x, y=y, bound=bound)
+            if self.engine is not None:
+                self._observed = min(getattr(self, "_observed", -1), self.index - 1)
+                self._observe()
         elif self.awaiting == "first_past":
             self.first_past_saddle_no = n
             self._log("first_past_confirm", saddle_no=n)
@@ -319,7 +376,17 @@ class SeedingSession:
             "human_minutes": hm, "over_budget": self.over_budget(), "budget_cap_min": self.budget_cap_min,
             "seeding_seconds_initial": self.seeding_seconds_initial(),
             "finished": self.finished_at is not None, "headless": self.headless, "log": self.log,
+            "timeline": self._timeline_json(),
         }
+
+    def _timeline_json(self) -> dict | None:
+        if self.engine is None:
+            return None
+        out: dict[str, dict[str, list[float]]] = {}
+        for f, objs in self.engine.timeline().items():
+            if objs:
+                out[str(f)] = {str(o): [ob.box.x1, ob.box.y1, ob.box.x2, ob.box.y2, ob.conf] for o, ob in objs.items()}
+        return out
 
     def write(self, out_dir: Path) -> Path:
         out_dir = Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)

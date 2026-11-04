@@ -28,14 +28,15 @@ class OracleDetector:
     """Anonymous detections from synthetic truth boxes, with jitter / dropouts / spurious boxes."""
 
     def __init__(self, truth_boxes: dict[int, dict[int, object]], jitter_px: float = 0.0, dropout: float = 0.0,
-                 spurious: float = 0.0, seed: int = 0):
+                 spurious: float = 0.0, seed: int = 0, loss_windows: dict[int, list[tuple[int, int]]] | None = None):
         self.truth, self.jitter, self.dropout, self.spurious = truth_boxes, jitter_px, dropout, spurious
+        self.loss = loss_windows or {}
         self.rng = np.random.default_rng(seed)
 
     def detect(self, frame_idx: int, frame=None) -> list[Detection]:
         out = []
-        for b in self.truth.get(frame_idx, {}).values():
-            if self.rng.random() < self.dropout:
+        for s, b in self.truth.get(frame_idx, {}).items():
+            if self.rng.random() < self.dropout or any(a <= frame_idx < bb for a, bb in self.loss.get(s, [])):
                 continue
             j = self.rng.normal(0, self.jitter, 4) if self.jitter else np.zeros(4)
             out.append(Detection(b.x1 + j[0], b.y1 + j[1], b.x2 + j[2], b.y2 + j[3], float(0.7 + 0.3 * self.rng.random())))

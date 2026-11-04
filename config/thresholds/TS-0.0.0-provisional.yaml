@@ -90,6 +90,7 @@ m3_track:
   mask_conf_flag: {value: 0.5, used_in: "SAM2-propagated mask confidence below which the operator is flagged (research 02)"}
   mask_overlap_flag: {value: 0.5, used_in: "IoU between two runners' masks above which a swap is suspected"}
   overlap_flag_s: {value: 0.6, used_in: "duration of mask overlap before flagging"}
+  lost_flag_s: {value: 0.2, used_in: "live seeding: frames without a box after a prompt before the operator is flagged (research 02)"}
 m6_events:
   osc_window_s: {value: 1.0, used_in: "window for bbox vertical-oscillation statistics"}
   osc_change_z: {value: 3.0, used_in: "z-score of oscillation regime change that opens a candidate"}

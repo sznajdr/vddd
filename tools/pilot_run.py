@@ -40,7 +40,7 @@ def main() -> int:
     ap.add_argument("--path", required=True, choices=["seeded", "detector"])
     ap.add_argument("--session"); ap.add_argument("--seeds"); ap.add_argument("--race-json"); ap.add_argument("--truth"); ap.add_argument("--tier-labels")
     ap.add_argument("--detector", default="blob", choices=["oracle", "blob", "gdino", "owlv2", "yolo"])
-    ap.add_argument("--propagator", default="oracle", choices=["oracle", "sam2"]); ap.add_argument("--sam2-ckpt"); ap.add_argument("--sam2-cfg", default="configs/sam2.1/sam2.1_hiera_s.yaml")
+    ap.add_argument("--propagator", default="oracle", choices=["oracle", "sam2", "session"]); ap.add_argument("--sam2-ckpt"); ap.add_argument("--sam2-cfg", default="configs/sam2.1/sam2.1_hiera_s.yaml")
     ap.add_argument("--ts", default=str(default_threshold_path()))
     ap.add_argument("--travel-sign", type=int); ap.add_argument("--rail-side"); ap.add_argument("--t0", type=float); ap.add_argument("--tend", type=float)
     ap.add_argument("--human-minutes", type=float, help="dry runs only: stand-in operator minutes when the session is headless");
@@ -96,6 +96,11 @@ def main() -> int:
             if tb is None:
                 raise SystemExit("--propagator oracle needs --truth")
             kw["propagator"] = OraclePropagator(tb)
+        elif a.propagator == "session":
+            from tripstate.seeding import SessionTimelinePropagator
+            if not sess.get("timeline"):
+                raise SystemExit("--propagator session needs a session recorded with a live engine (seed_cli --engine ...)")
+            kw["propagator"] = SessionTimelinePropagator(sess)
         else:
             from tripstate.pilot.track import SAM2Propagator
             kw["propagator"] = SAM2Propagator(str(a.video), a.sam2_ckpt, a.sam2_cfg)

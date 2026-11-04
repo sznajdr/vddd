@@ -46,7 +46,8 @@ def main() -> int:
     script = [{"do": "key", "key": "o"}, {"do": "key", "key": "t"}, {"do": "goto", "frame": a.seed_frame}]
     for sd in seeds:
         script += [{"do": "click", "x": sd["x"], "y": sd["y"]}, {"do": "type", "number": sd["saddle_no"]}]
-    script += [{"do": "key", "key": "8"}, {"do": "key", "key": " "}, {"do": "tick", "n": n}, {"do": "goto", "frame": n - 1},
+    script += [{"do": "key", "key": "8"}, {"do": "key", "key": " "}, {"do": "tick", "n": n}, {"do": "resolve_flags"},
+               {"do": "key", "key": " "}, {"do": "tick", "n": n}, {"do": "goto", "frame": n - 1},
                {"do": "key", "key": "e"}, {"do": "key", "key": "f"}, {"do": "type", "number": 1}, {"do": "key", "key": "q"}]
     (out / "seed_script.json").write_text(json.dumps(script, indent=1))
     (out / "race.json").write_text(json.dumps({"race_id": "SYNTH-1", "fps": race.fps, "n_frames": n, "t0_s": race.t0, "tend_s": race.tend,

@@ -3,7 +3,7 @@
 Spec: SPEC-2.0.0-draft §4 M3, §5.1, EC-08/09/12/14; ledger L-21…L-24; decisions D-01, D-02, D-16, D-30, D-34.
 Research: docs/research/02-tracking-and-seeding.md.
 
-> Status 2026-11-04: steps 1–5 have a tested skeleton (`tripstate.seeding.SeedingSession`, `tripstate.pilot.assign`, `OraclePropagator`/`SAM2Propagator`, `trackeval`); the SAM 2 adapter is unverified on real footage.
+> Status 2026-11-04: live flags are wired (`tripstate.seeding.live`: engines + `FlagMonitor`, session pause-on-flag, re-seed = prompt, timeline export); steps 1–5 have a tested skeleton (`tripstate.seeding.SeedingSession`, `tripstate.pilot.assign`, `OraclePropagator`/`SAM2Propagator`, `trackeval`); the SAM 2 adapter is unverified on real footage.
 
 Build, in order, each step testable on one OD-1x replay:
 1. **Prompt store.** `id_assignments` gains `seed_x_px`, `seed_y_px`, `seed_box_ref` (RP-18). A seed = (shot_id, frame, saddle_no, x, y).

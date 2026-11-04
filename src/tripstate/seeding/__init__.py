@@ -3,6 +3,12 @@
 `SeedingSession` is a pure state machine (no display, injectable clock) so the operator loop is
 unit-testable; `tools/seed_cli.py` wraps it with an OpenCV window.
 """
+from tripstate.seeding.live import (
+    DetectorLiveEngine,
+    FlagMonitor,
+    OracleLiveEngine,
+    SessionTimelinePropagator,
+)
 from tripstate.seeding.session import KEYMAP, Candidate, Flag, Seed, SeedingSession
 
-__all__ = ["KEYMAP", "Candidate", "Flag", "Seed", "SeedingSession"]
+__all__ = ["KEYMAP", "Candidate", "DetectorLiveEngine", "Flag", "FlagMonitor", "OracleLiveEngine", "Seed", "SeedingSession", "SessionTimelinePropagator"]

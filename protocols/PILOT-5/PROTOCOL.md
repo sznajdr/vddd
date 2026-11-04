@@ -33,12 +33,12 @@
 
 ```bash
 python tools/synth_video.py --out data/synth
-python tools/seed_cli.py data/synth/synth.mp4 --race SYNTH-1 --out data/synth/session --script data/synth/seed_script.json
-python tools/pilot_run.py --video data/synth/synth.mp4 --race SYNTH-1 --race-json data/synth/race.json --session data/synth/session/session.json --truth data/synth/synth.mp4.truth.json --tier-labels data/synth/tier_labels.csv --path seeded --propagator oracle --out data/pilot5/SYNTH-1
+python tools/seed_cli.py data/synth/synth.mp4 --race SYNTH-1 --out data/synth/session --script data/synth/seed_script.json --engine oracle --truth data/synth/synth.mp4.truth.json
+python tools/pilot_run.py --video data/synth/synth.mp4 --race SYNTH-1 --race-json data/synth/race.json --session data/synth/session/session.json --truth data/synth/synth.mp4.truth.json --tier-labels data/synth/tier_labels.csv --path seeded --propagator session --out data/pilot5/SYNTH-1
 python tools/pilot_run.py --video data/synth/synth.mp4 --race SYNTH-1 --race-json data/synth/race.json --session data/synth/session/session.json --truth data/synth/synth.mp4.truth.json --tier-labels data/synth/tier_labels.csv --path detector --detector oracle --out data/pilot5/SYNTH-1
 python tools/pilot_report.py --reports 'data/pilot5/SYNTH-1/report_*.json' --md data/pilot5/pilot_report.md
 ```
-`make pilot-demo` runs the five commands into a scratch directory. On real replays replace `--propagator oracle` with `--propagator sam2 --sam2-ckpt …` and `--detector oracle` with `gdino`, `owlv2` or `yolo`; drop `--truth` (metrics then need the operator-corrected result exported as truth).
+`make pilot-demo` runs the five commands into a scratch directory. On real replays run the seeding tool with `--engine sam2 --sam2-ckpt …` (or `--engine detector --detector gdino|owlv2|yolo`) so flags arrive live, then `--propagator session`; alternatively `--propagator sam2 --sam2-ckpt …` re-propagates offline and `--detector oracle` with `gdino`, `owlv2` or `yolo`; drop `--truth` (metrics then need the operator-corrected result exported as truth).
 
 ## Output
 
