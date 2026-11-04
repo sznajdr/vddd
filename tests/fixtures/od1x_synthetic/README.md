@@ -3,9 +3,7 @@
 **Not evidence.** Every number here is invented so that `tools/promote_draft.py --dry-run` and the
 calibration/evaluation dry runs can exercise the D-36 mechanics end to end before OD-1x happens.
 The sheets follow `protocols/OD-1x/sheets/*.csv` column for column; `pilot_reports/` carries the five
-fields `tools/pilot_report.py` aggregates. `evidence_gated.template.yaml` is the real registry plus one
-synthetic entry for `stratum_yield_review_factor` (unbound in the real registry: owner decision, see
-`docs/AUDIT.md`); `kill_gates_pass.yaml` has KG-1…KG-4 `pass` with synthetic measurements and KG-5
+fields `tools/pilot_report.py` aggregates. `evidence_gated.template.yaml` matches the real registry exactly; the old synthetic policy entry was removed after L-48. `kill_gates_pass.yaml` has KG-1…KG-4 `pass` with synthetic measurements and KG-5
 `not_evaluated` to exercise the advisory path.
 
 Regenerate the instantiated registry with:

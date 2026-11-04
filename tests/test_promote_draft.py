@@ -48,13 +48,12 @@ def inputs(registry, gates, strip_open=True) -> PromotionInputs:
 
 # --- fixture integrity ------------------------------------------------------------------------
 
-def test_template_registry_is_real_registry_plus_one_documented_synthetic_entry():
+def test_template_registry_matches_real_registry():
     real = {e["key"]: e for e in REAL_REGISTRY["entries"]}
     tmpl = {e["key"]: e for e in TEMPLATE["entries"]}
-    assert set(tmpl) - set(real) == {"stratum_yield_review_factor"}
+    assert set(tmpl) == set(real)
     for k, e in real.items():
         assert tmpl[k] == e, k
-    assert "SYNTHETIC" in tmpl["stratum_yield_review_factor"]["instrument"]
 
 
 def test_instantiate_from_synthetic_sheets_and_pilot():
@@ -80,7 +79,7 @@ def test_instantiate_from_synthetic_sheets_and_pilot():
 
 def test_every_marker_in_the_committed_draft_binds_with_the_synthetic_registry():
     bs = [b for b in bind_markers(DRAFT, TEMPLATE, PASS_GATES) if b.kind != "header"]
-    assert len(bs) == 24 and all(b.ok for b in bs), [b.problems for b in bs if not b.ok]
+    assert len(bs) == 20 and all(b.ok for b in bs), [b.problems for b in bs if not b.ok]
     kinds = {b.kind for b in bs}
     assert kinds == {"registry", "kill_gate", "kill_gates_all", "meta"}
     two_key = [b for b in bs if len(b.keys) == 2]
@@ -89,13 +88,10 @@ def test_every_marker_in_the_committed_draft_binds_with_the_synthetic_registry()
     assert len(four) == 1 and four[0].nums == [] and four[0].replacement == "frozen"  # EC-12
 
 
-def test_real_registry_leaves_exactly_the_policy_number_unbound():
-    """Documents the finding: stratum_yield_review_factor is marked [EG] in the draft but has no registry
-    entry / instrument (owner decision). Everything else binds against the real registry."""
+def test_real_registry_binds_all_markers_after_delegated_decisions():
     bs = [b for b in bind_markers(DRAFT, REAL_REGISTRY, REAL_GATES) if b.kind != "header"]
-    bad = [b for b in bs if not b.ok]
-    assert {b.line_no for b in bad} and all("binds to no registry entry" in p for b in bad for p in b.problems)
-    assert all("stratum_yield_review_factor" in DRAFT.splitlines()[b.line_no - 1] for b in bad)
+    assert all(b.ok for b in bs), [b.problems for b in bs if not b.ok]
+    assert not load_default().thresholds["stratum_yield_review_factor"].eg
 
 
 def test_freeze_check_blocks_on_registry_gates_markers_and_open_decisions():
@@ -103,12 +99,14 @@ def test_freeze_check_blocks_on_registry_gates_markers_and_open_decisions():
     assert not rep.allowed
     assert any(p.startswith("EG not instantiated") for p in rep.problems)
     assert any(p.startswith("kill-gate KG-1") for p in rep.problems)
-    assert any("binds to no registry entry" in p for p in rep.problems)
-    assert sum("owner decision open" in p for p in rep.problems) == 3
+    assert not any("binds to no registry entry" in p or "owner decision open" in p for p in rep.problems)
     assert rep.advisories and "KG-5" in rep.advisories[0]
     # fully instantiated synthetic registry + passing gates + stripped [OPEN] markers -> allowed
     ok = check_freeze(synthetic_registry(), PASS_GATES, strip_open_markers(DRAFT), "DRAFT")
-    assert ok.allowed and ok.n_markers == 24 == ok.n_bound
+    assert ok.allowed and ok.n_markers == 20 == ok.n_bound
+    # New unbound markers still block promotion; settled decisions do not disable this guard.
+    unbound = check_freeze(synthetic_registry(), PASS_GATES, DRAFT + '\n`unknown_key` 1 `[EG]`\n', "DRAFT")
+    assert not unbound.allowed and any("binds to no registry entry" in p for p in unbound.problems)
     # FROZEN status with leftovers is flagged as inconsistent
     bad = check_freeze(REAL_REGISTRY, REAL_GATES, DRAFT, "FROZEN")
     assert bad.problems[0].startswith("SPEC_STATUS is FROZEN but markers remain")
@@ -123,9 +121,11 @@ def test_refuses_on_uninstantiated_registry():
 
 
 def test_refuses_on_remaining_open_markers():
+    inp = inputs(synthetic_registry(), PASS_GATES, strip_open=False)
+    inp.draft_text += '\n`[OPEN: injected unresolved decision]`\n'
     with pytest.raises(PromotionRefused) as ei:
-        promote(inputs(synthetic_registry(), PASS_GATES, strip_open=False))
-    assert all("owner decision open" in r for r in ei.value.reasons) and len(ei.value.reasons) == 3
+        promote(inp)
+    assert all("owner decision open" in r for r in ei.value.reasons) and len(ei.value.reasons) == 1
 
 
 def test_refuses_when_a_kill_gate_does_not_pass_or_the_spec_disagrees_with_the_registry():
@@ -225,7 +225,7 @@ def test_real_run_on_an_isolated_copy_is_idempotent_and_consistent(tmp_path):
     draft = copy / "spec/SPEC-2.0.0-draft.md"
     draft.write_text(strip_open_markers(draft.read_text(encoding="utf-8")), encoding="utf-8")
     tool = copy / "tools/promote_draft.py"
-    env = {"PYTHONDONTWRITEBYTECODE": "1", "PATH": "/usr/bin:/bin"}
+    env = {"PYTHONDONTWRITEBYTECODE": "1", "PYTHONUTF8": "1", "PATH": "/usr/bin:/bin"}
     first = subprocess.run([sys.executable, str(tool), "--date", "2026-11-04"], capture_output=True, text=True, cwd=copy, env=env, check=False)
     assert first.returncode == 0, first.stdout + first.stderr
     assert "PROMOTED" in first.stdout and (copy / "spec/SPEC-2.0.0.md").exists() and (copy / "config/thresholds/TS-2.0.0-frozen.yaml").exists()

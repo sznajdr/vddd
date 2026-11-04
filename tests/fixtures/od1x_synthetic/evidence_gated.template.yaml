@@ -1,5 +1,3 @@
-# SYNTHETIC registry template for the freeze dry run = spec/registers/evidence_gated.yaml + one synthetic entry.
-# Regenerated/verified by tests/test_promote_draft.py; never copy this file over the real registry.
 # Evidence-gated registry (RECON §4; D-36).
 # Every entry blocks the 2.0.0 freeze until `instantiated: true` with a `value`,
 # an `evidence` pointer (OD-1x sheet + row range) and a `date`.
@@ -170,14 +168,3 @@ entries:
     value: null
     evidence: null
     date: null
-  # --- SYNTHETIC ENTRY, dry run only (tests/fixtures/od1x_synthetic): the real registry has no entry for this
-  # key because it has no instrument (owner decision, docs/AUDIT.md). It exists here so the promotion mechanics
-  # can be rehearsed end to end.
-  - key: stratum_yield_review_factor
-    provisional: 0.5
-    instrument: "SYNTHETIC: none (policy number, D-35 review trigger)"
-    rule: "SYNTHETIC: kept at provisional"
-    instantiated: true
-    value: 0.5
-    evidence: "SYNTHETIC fixture tests/fixtures/od1x_synthetic (not evidence)"
-    date: "2026-11-04"

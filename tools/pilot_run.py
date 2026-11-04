@@ -43,7 +43,7 @@ def main() -> int:
     ap.add_argument("--propagator", default="oracle", choices=["oracle", "sam2", "session"]); ap.add_argument("--sam2-ckpt"); ap.add_argument("--sam2-cfg", default="configs/sam2.1/sam2.1_hiera_s.yaml")
     ap.add_argument("--ts", default=str(default_threshold_path()))
     ap.add_argument("--travel-sign", type=int); ap.add_argument("--rail-side"); ap.add_argument("--t0", type=float); ap.add_argument("--tend", type=float)
-    ap.add_argument("--human-minutes", type=float, help="dry runs only: stand-in operator minutes when the session is headless");
+    ap.add_argument("--human-minutes", type=float, help="dry runs only: stand-in operator minutes when the session is headless")
     ap.add_argument("--official-elapsed", type=float); ap.add_argument("--start-type", default="autostart"); ap.add_argument("--field-size", type=int)
     a = ap.parse_args()
     ts = ThresholdSet.load(a.ts)

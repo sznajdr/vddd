@@ -127,7 +127,7 @@ Classification precedence is normative:
 
 | State | Definition (pack-space) | Trot-lexicon anchor |
 |-------|-------------------------|---------------------|
-| `LEADER` | Tier 1, longitudinal rank 1 within tier 1, not covered. | « en tête » |
+| `LEADER` | Tier 1, longitudinal rank 1 within tier 1, regardless of cover. Record `covered` independently (RP-11). | « en tête » |
 | `POCKET` | Tier 1, covered, exactly one tier-1 runner ahead. | « dans le dos du leader » |
 | `RAIL_COVERED` | Tier 1, covered, ≥ 2 tier-1 runners ahead. | « le long de la corde » |
 | `RAIL_UNCOVERED` | Tier 1, not covered, with ≥ 1 tier-1 runner ahead. | « à la corde, sans dos » |
@@ -137,9 +137,9 @@ Classification precedence is normative:
 | `NOT_VISIBLE` | No supported detection for the runner this frame. | — |
 | `UNKNOWN` | Detection exists but projection confidence below `min_state_conf`. | — |
 
-**Metric note (normative, D-27):** the headline metric (§6.2) measures the uncovered-outside *mask* (`tier ≥ 2 ∧ covered = false`), not the `PARKED` label; the label boundary (tier 2 vs ≥ 3) is categorical by design while the money metric is geometric. `[OPEN: RP-11]` Under tier-independent cover a tier-1 runner with no tier-1 runner ahead can be covered by an outside runner; this table has no row for it and implementations emit `UNKNOWN` with reason `table_gap_tier1_lead_covered` until the owner decides (recommended: keep `LEADER`, record `covered = true`).
+**Metric note (normative, D-27):** the headline metric (§6.2) measures the uncovered-outside *mask* (`tier ≥ 2 ∧ covered = false`), not the `PARKED` label; the label boundary (tier 2 vs ≥ 3) is categorical by design while the money metric is geometric. RP-11 resolved: a tier-1 runner with no tier-1 runner ahead remains `LEADER` even when covered by an outside runner; record `covered = true`.
 
-**Design invariant (normative):** `LEADER` and `PARKED` are both uncovered but MUST remain distinct states — uncovered-by-choice at the front vs. uncovered-in-the-flow paying the aerodynamic/energetic toll. No aggregation may merge them upstream of feature engineering.
+**Design invariant (normative):** `LEADER` and `PARKED` MUST remain distinct states: leadership is rank within tier 1, while `PARKED` is an uncovered tier-2 position. Cover is independent of leadership (D-26, RP-11). No aggregation may merge them upstream of feature engineering.
 
 For every base state other than `NOT_VISIBLE` and `UNKNOWN`, boolean attribute `covered` MUST be recorded from §2.2. This is redundant for most states by design and preserves cover status for `WIDE`.
 
@@ -199,7 +199,7 @@ Per frame, over all valid detections:
 - Homography to metric track coordinates: **banned in v1** (out of scope §12; only reconsidered if GPS/sectional calibration data ever materializes).
 - Y-coordinate-as-depth heuristics: **banned** (superseded by pack-space projection).
 
-`[OPEN: RP-19/RP-22/RP-23 — owner decision]` The world-space simulator study (`docs/research/11-simulated-geometry.md`) shows that from an elevated side-on camera lateral metres project at roughly height/depth of longitudinal metres, so `SW = SL·sw_ratio` merges adjacent lanes by construction, that the §3.1 motion axis is biased by pan/zoom even without jitter, and that the `(mid-x, max-y)` centroid carries a pan-dependent lateral bias. Three options are implemented in the reference projector and proposed for adoption: (a) `axis_source = rail` — the projected rail-line direction as the primary axis, never smoothed; (b) `lateral_scale_mode = rail_fence_projective` — a 1-D projective lateral coordinate from the rail line, the fence line and their vanishing point (horizon assumed horizontal; needs `track_width_sl` `[EG]`), with each runner measured against the nearest rail/fence polyline segment on bends; (c) a foot-point correction (`vehicle_half_width_sw`) from the bbox bottom edge to the vehicle centre line. (b) is not a homography to track coordinates and would need an explicit carve-out in this section. Lateral resolvability remains bounded by the covering camera's elevation per track section (RP-24).
+**Accepted geometry modes (RP-19/20/21/22/23).** The rail direction (`axis_source = rail`) MAY replace the motion axis on shots with a reliable rail line; it is not temporally smoothed. `lateral_scale_mode = rail_fence_projective` MAY derive a 1-D lateral coordinate from rail/fence lines and their vanishing point, with a local polyline datum on bends and the implemented `vehicle_half_width_sw` foot-point correction. This is an explicit carve-out from the image-depth heuristic ban: it is not a homography to track coordinates and does not authorize track-landmark detection. `track_width_sl` remains evidence-gated. These modes are opt-in per shot; the provisional `motion` / `sw_ratio` defaults remain for reproducible baselines until real measurements support a change. No rail/fence or degenerate projection means no invented lateral coordinate: use EC-13 `tier = NULL`, confidence 0 and downstream `UNKNOWN`. RP-24/25 are handled by this abstention rule and OD-1x observations; a new QC column or a replacement SL definition is deferred until replay evidence exists. Synthetic camera parameters are not measurements of Vincennes.
 
 ### 3.4 Temporal smoothing
 
@@ -332,7 +332,7 @@ Each module: **Input contract → Output contract → Acceptance test → Defini
 
 ## 5. Human Workflow & Budgets (normative)
 
-### 5.1 Per-race operator loop (target median ≤ 5 min, cap 8 min `[EG]`; D-09, D-29)
+### 5.1 Per-race operator loop (target `dod3_median_target_min`, cap `human_budget_cap_min`; D-09, D-29)
 
 1. Open race in seeding tool → confirm the initial wide-pan segment's proposed travel-direction + rail-side orientation (1 key when both are correct).
 2. Mark `t_0` and `t_end` anchors (2 clicks; volte vs. autostart semantics per EC-04).
@@ -379,7 +379,8 @@ Single-operator project. Where this spec says "human", it means the project owne
 | **Confusion matrix** | Frame-level (1 Hz resample) base-state confusion, per race and pooled. |
 | **Uncovered-outside mask IoU** | Same construction as the covered mask over `tier ≥ 2 ∧ covered = false` (`PARKED`, and `WIDE` with `covered = false`). The money mask (D-27). |
 | **Weighted headline score** | `0.5·IoU(uncovered-outside mask) + 0.3·IoU(covered mask) + 0.2·MacroIoU(rest)`, where `rest = {LEADER, RAIL_UNCOVERED, WIDE}`; `DETACHED` is reported descriptively per stratum, outside the headline (D-28). Reported both with and without Q-7 failures (D-35). This is the number quoted as "extractor accuracy"; DoD-1 additionally requires the two mask floors stated there. |
-| **Chartable rate (per stratum)** | Share of eligible attempts with `chartable = true`, overall and per stratum (day/night × field-size band × `start_format` × `piste`). Review trigger: any stratum below `stratum_yield_review_factor` × overall (0.5 `[EG]`) → manifest/threshold review before further charting (D-35). |
+| **Segment continuity (descriptive)** | Segmental edit score and F1@{10,25,50} (RP-14); report alongside IoU, never as new release floors. |
+| **Chartable rate (per stratum)** | Share of eligible attempts with `chartable = true`, overall and per stratum (day/night × field-size band × `start_format` × `piste`). Review trigger: any stratum below `stratum_yield_review_factor` × overall (0.5, ordinary review-policy config) → manifest/threshold review before further charting (D-35). |
 | **Segmental edit score, F1@{10, 25, 50}** (descriptive) | Lea et al. (2017) conventions over per-runner base-state sequences; reported next to Segment IoU to expose over-segmentation. Never a floor. |
 | **Break recall / candidate load** | Recall is measured on all machine-generated candidates **before** human filtering against hand-charted breaks whose starts are observable inside the configured shot type. A candidate matches when start times differ by ≤ `break_match_tolerance_s`, using one-to-one minimum-time-distance matching; one candidate cannot satisfy two truths. Candidate load counts all generated candidates regardless of final `review_status` and is summarized per **M6-evaluable attempt**: an eligible attempt (§5.1) with valid timeline anchors that reaches M6 inference. Human-confirmed event precision is reported descriptively but has no v1 floor. |
 | **Human-minutes** | Median per eligible attempted race, including `over_budget` exclusions (DoD-3). |
@@ -416,7 +417,7 @@ Thresholds are a **versioned artifact** (`threshold_set_version`), never constan
 | `rail_ref_conf_min` | 0.5 | EC-13 (M4 rail-reference confidence; module default) |
 | `axis_neighbourhood_k` | 0 `[EG: OD-1x bend frame]` | §3.1 (0 = whole-pack axis; RP-20) |
 | `axis_min_vector_sl` / `axis_smooth_s` | 0.05 / 1.0 | §3.1 motion-axis jitter guard and temporal smoothing (RP-21) |
-| `lateral_scale_mode` / `track_width_sl` | sw_ratio / 5.8 `[EG: track plan]` | §3.2 lateral scale; `rail_fence` = two track lines at known separation (RP-19, `[OPEN]`) |
+| `lateral_scale_mode` / `track_width_sl` | sw_ratio / 5.8 `[EG: track plan]` | §3.2–3.3; optional `rail_fence_projective` uses two track lines and a vanishing point (RP-19 refined); linear `rail_fence` is diagnostic only |
 | `rail_lane_center_offset_sw` | 0.5 | §2.2 |
 | `rail_attach_sw` | 1.0 | §2.2 / EC-13 |
 | `rank_tie_sl` | 0.10 | §2.2 / §2.3 |
@@ -433,7 +434,7 @@ Thresholds are a **versioned artifact** (`threshold_set_version`), never constan
 | `anchor_tol_volte_s` / `anchor_tol_autostart_s` | 2.0 / 2.0 `[EG: OD-1x]` | EC-12 / Q-3 (D-34) |
 | `finish_evidence_min_k` | 3 `[EG: OD-1x]` | M3 DoD (a) rung (ii) (D-30) |
 | `human_budget_cap_min` | 8 `[EG: pilot ≈ p90]` | §5.1 / Q-7 (D-29) |
-| `stratum_yield_review_factor` | 0.5 `[EG]` | §6.2 chartable rate (D-35) |
+| `stratum_yield_review_factor` | 0.5 | §6.2 chartable rate (D-35) |
 | `time_unit_consistency_tol_s` | 0.5 | M0 metadata normalization |
 | `plausible_km_rate_min_s` / `plausible_km_rate_max_s` | 65 / 110 | M0 metadata normalization (S-5: 55 never bound; attelé record RK ≈ 69 s/km) |
 | `early_phase_end` / `late_phase_start` | 0.30 / 0.72 | §2.6 |
@@ -619,13 +620,15 @@ Phase phrases map to `phase ∈ {early, mid, late, stretch, unknown}` under the 
 |---------|----------------|
 | Language / runtime | Python ≥ 3.11 |
 | Detection | Ultralytics YOLO family (v8/v11), single class, fine-tuned on owner annotations |
-| Tracking | ByteTrack or BoT-SORT (as shipped with Ultralytics), coasting limits per EC-08 |
-| Shot segmentation | PySceneDetect (cuts) + small CNN/CLIP-linear frame classifier (base shot type) + static overlay-mask detector for broadcast graphics |
+| Tracking | Click-seeded SAM 2 propagation by saddle number; detector + BoT-SORT comparison/fallback; identity remains human-confirmed (RP-12, D-01) |
+| Shot segmentation | TransNetV2 cuts + CLIP zero-shot shot type + static overlay masks (RP-15); existing adaptive-cut/blob reference remains the deterministic synthetic fallback |
 | Geometry / video | OpenCV, ffmpeg |
 | Seeding tool | OpenCV window + keyboard handler (no web UI in v1, D-16) |
 | Storage | SQLite (relational) + parquet sidecars (frame-level series); pandas/polars for exports |
 | Config | Single YAML per `threshold_set_version`, committed to repo |
 | Experiment tracking | Plain changelog entries in this file + `versions` table (no MLOps platform in v1) |
+
+Hand charts: BORIS ethogram with repo-owned conversion and manifest split checks (RP-17). The pilot uses open-vocabulary Grounding DINO / OWLv2 detection without training (RP-13). Seed click columns `seed_x_px`, `seed_y_px`, `seed_box_ref` are approved as additive identity-provenance metadata for the next schema task (RP-18), not geometric state coordinates. Human charts use schema/producer versions; extractor/threshold columns remain absent for human rows. Race-level `SHOT_GAP` keeps `saddle_no = 0`, which is not a runner identity.
 
 Annotation for M2 training: keyframe labeling with interpolation (CVAT or Roboflow acceptable; artifacts exported to repo-owned formats so the platform is not a dependency).
 

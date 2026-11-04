@@ -146,3 +146,18 @@ def test_aggregate_and_kill_gates(tmp_path):
     assert (ROOT / "spec/registers/kill_gates.yaml").read_text() == repo_before   # repo file untouched
     md = markdown(agg, st)
     assert "KG-3 | 0.5" in md
+    # A caller-supplied registry must control every numeric cutoff, including write-back.
+    import yaml
+    custom = yaml.safe_load(repo_before)
+    for gate in custom["gates"]:
+        if gate["id"] == "KG-1":
+            gate["threshold_min"] = 4.0
+        elif gate["id"] in ("KG-2", "KG-3"):
+            gate["threshold"] = 0.95
+        elif gate["id"] == "KG-4":
+            gate["threshold_factor"] = 0.1
+    assert evaluate_kill_gates(agg, custom) == {
+        "KG-1": "fail", "KG-2": "recalibrate_once", "KG-3": "fail", "KG-4": "fail",
+    }
+    kg.write_text(yaml.safe_dump(custom), encoding="utf-8")
+    assert write_kill_gates(kg, agg, "custom gate regression")["KG-1"] == "fail"

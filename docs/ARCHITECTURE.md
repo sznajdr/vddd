@@ -103,3 +103,7 @@ simulated promotion with diffs), `make calibrate-dry-run` (mis-set thresholds re
 (synthetic store, every DoD line). The real promotion additionally rehearses itself in `tests/test_promote_draft.py`
 on an isolated copy of the repository (idempotent second run, `freeze_check` green afterwards).
 
+
+## Continuation decisions (SPEC-2.0.0-draft, 2026-11-04)
+
+Ledger L-46…L-50 resolves the design queue; see `docs/decisions/2026-11-04-continuation.md`. M5 leadership and cover are independent. Rail/projective geometry is an accepted opt-in mode, with EC-13 abstention when unresolved; existing defaults remain reproducible. Intended model stacks are approved, while real adapters remain implementation tasks. Pilot gate evaluation reads the selected registry, and release evaluation rejects missing or split-mismatched truth and scopes CV events to the selected producer. D1 is complete; continue the handoff coding queue without waiting for another design approval.

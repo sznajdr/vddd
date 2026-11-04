@@ -72,7 +72,7 @@ qc:
   max_field_size: {value: 14, used_in: "Q-6 (D-06)"}
 
 yield:
-  stratum_yield_review_factor: {value: 0.5, eg: true, used_in: "§6.2 per-stratum chartable trigger (D-35)"}
+  stratum_yield_review_factor: {value: 0.5, used_in: "§6.2 per-stratum chartable trigger (D-35)"}
 
 # §0.2 / §6.3 acceptance numbers and §7.2 calibration constraints are versioned threshold values too (D-18; §0.2:
 # "threshold values in DoD-1/2 MAY be revised via §7 with a version bump; the structure MUST NOT change").

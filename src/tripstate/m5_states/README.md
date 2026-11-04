@@ -9,4 +9,4 @@
 | Acceptance | Dev hand charts: macro base-state IoU ≥ 0.80; **uncovered-outside mask IoU and covered-mask IoU ≥ 0.85** (RP-1 re-reference). |
 | DoD | Exhaustive per-frame classification; unit tests on synthetic trajectories (crossing, rail-uncovered gaps, detachment, short occlusion, tier drift, lead changes). |
 
-**Known table gap (RP-11):** with tier-independent cover (D-26), a tier-1 front runner can be covered by an outside runner slightly ahead within `cover_lat_sw`. 1.2.0's table has no row for it. The reference implementation emits `UNKNOWN` with reason `table_gap_tier1_lead_covered` until the owner decides (candidates: keep `LEADER` with `covered = true`, or new state). Logged in `spec/RECON-2.0.0-patches.md`.
+**RP-11 resolved (ledger L-46):** the front tier-1 runner remains `LEADER` when covered by an outside runner. `covered = true` is retained independently; no new base state or inferred identity is introduced. The covered-leader fixture and rail-rank tie fixture cover both precedence and abstention.

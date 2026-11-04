@@ -33,12 +33,18 @@ Each entry: what was checked, what was wrong, what changed. Dates are when the f
 | 2026-11-04 | Handoff text | "Changelog row template already in the draft's changelog" — the template is in the ledger (`SPEC-2.0.0-draft-LEDGER.md` row `2.0.0 | _at freeze_`), not in the draft. | `promote.changelog_row` follows the ledger template; no draft edit needed. |
 | 2026-11-04 | pilot/report.py × D-18 | `evaluate_kill_gates` hard-codes the gate thresholds (8, 0.85, 0.40, 2.0) that `kill_gates.yaml` carries. | Not changed in this block (tests pin the function signature); listed below as hygiene. |
 
-## Open items found by the audit (owner decisions)
+## Disposition after delegated decisions (2026-11-04)
 
-- RP-11 (D-26 table gap), see `spec/RECON-2.0.0-patches.md`.
-- `events.saddle_no = 0` convention for race-level rows: confirm or choose NULL with a non-PK surrogate.
-- `hand_charts` has no `extractor_version`/`threshold_set_version` columns by design (§9 says they MAY be NULL for human charts); the DDL omits them entirely. Confirm.
-- **`stratum_yield_review_factor`** (0.5): marked `[EG]` in §6.2 and §7.1 but it is a review-trigger policy number with no OD-1x/pilot instrument. Recommended: ledger edit removing the marker (plain D-18 config, tunable in §7). Alternative: a registry entry with an instrument the owner can actually run. The promotion refuses until one of the two is done.
-- The §5.1 heading says "target median ≤ 5 min" without an `[EG]` marker although DoD-3's 5 min is evidence-gated (`dod3_median_target_min`): if the pilot median lands on 6, the heading goes stale at the freeze. Suggested ledger edit: add the marker (or reference `dod3_median_target_min`).
-- `pilot/report.py` kill-gate thresholds should be read from `kill_gates.yaml` (D-18 hygiene; S).
+Earlier table rows are historical findings. The owner delegated the remaining verdicts; `docs/decisions/2026-11-04-continuation.md` supersedes their pending wording.
 
+- RP-11 fixed: LEADER precedence with independent cover, tested.
+- Policy EG markers/TS flag removed; real and synthetic registries now match. All draft markers bind.
+- Three OPEN markers resolved through reproducible ledger edits; optional rail/projective geometry accepted with EC-13 abstention.
+- SHOT_GAP saddle 0 and human chart version-column design retained.
+- Operator heading now references config keys rather than repeating provisional numbers.
+- Pilot cutoffs now read the selected registry, including write-back; regression changes all four cutoffs.
+- Release review fixed missing/split-mismatched held-out charts and cross-producer BREAK contamination; three regression cases added.
+- Windows isolated-promotion test now keeps UTF-8 mode in its minimal child environment.
+- Ruff conventions explicitly retain established compact reference code and mathematical names, with import bootstrapping permitted only in tools; the lambda and redundant semicolon were fixed.
+
+Remaining work is the implementation queue in the handoff plus real external evidence. No unresolved design approval is a blocker.

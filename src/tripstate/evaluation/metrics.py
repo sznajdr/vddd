@@ -58,7 +58,8 @@ def segment_iou(pred: Iterable[Interval], true: Iterable[Interval], mask: Iterab
 
 
 def per_runner_state_iou(pred_rows: Sequence[dict], true_rows: Sequence[dict], mask: Iterable[Interval], state: str) -> float | None:
-    is_state = lambda r: r["state_kind"] == "base" and r["state"] == state
+    def is_state(r):
+        return r["state_kind"] == "base" and r["state"] == state
     return segment_iou(_ivs(pred_rows, is_state), _ivs(true_rows, is_state), mask)
 
 

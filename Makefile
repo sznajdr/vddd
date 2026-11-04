@@ -23,7 +23,7 @@ freeze-check:
 freeze-dry-run:
 	rm -rf /tmp/tripstate-freeze-dry-run && mkdir -p /tmp/tripstate-freeze-dry-run
 	python tools/instantiate_eg.py tests/fixtures/od1x_synthetic --registry tests/fixtures/od1x_synthetic/evidence_gated.template.yaml --pilot-reports 'tests/fixtures/od1x_synthetic/pilot_reports/*.json' --out /tmp/tripstate-freeze-dry-run/evidence_gated.synthetic.yaml --date 2026-11-04
-	python tools/promote_draft.py --dry-run --registry /tmp/tripstate-freeze-dry-run/evidence_gated.synthetic.yaml --kill-gates tests/fixtures/od1x_synthetic/kill_gates_pass.yaml --strip-open-markers --out-dir /tmp/tripstate-freeze-dry-run/promotion --date 2026-11-04
+	python tools/promote_draft.py --dry-run --registry /tmp/tripstate-freeze-dry-run/evidence_gated.synthetic.yaml --kill-gates tests/fixtures/od1x_synthetic/kill_gates_pass.yaml --out-dir /tmp/tripstate-freeze-dry-run/promotion --date 2026-11-04
 
 od1x-timer:
 	python tools/od1x_timer.py --help
