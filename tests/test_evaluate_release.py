@@ -3,10 +3,39 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 from tripstate.release.evaluate import changelog_row, evaluate_release, render_markdown
 from tripstate.release.synthetic_store import build_synthetic_store
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.mark.parametrize("damage", ["missing_chart", "wrong_split"])
+def test_incomplete_or_unsealed_heldout_truth_cannot_pass_accuracy(ts, damage):
+    store, manifest = build_synthetic_store(ts)
+    rid = next(e["race_id"] for e in manifest["entries"] if e["split"] == "heldout")
+    if damage == "missing_chart":
+        store.conn.execute("DELETE FROM hand_charts WHERE race_id = ?", (rid,))
+    else:
+        store.conn.execute("UPDATE hand_charts SET split = 'dev' WHERE race_id = ?", (rid,))
+    ev = evaluate_release(store, manifest, ts, "x", "2026-11-04")
+    assert ev.dod("DoD-6").status == "pass"
+    for id_ in ("DoD-1", "DoD-2"):
+        assert ev.dod(id_).status == "invalid"
+        assert rid in ev.dod(id_).summary
+
+
+def test_selected_producer_does_not_borrow_break_candidates_from_another_run(ts):
+    store, manifest = build_synthetic_store(ts)
+    candidates = [r for r in store.rows("events") if r["method"] == "cv_extract"]
+    for row in candidates:
+        row["producer_version"] = "other-cv-run"
+    store.insert("events", candidates, producer_version="other-cv-run", created_at="2026-11-04T00:00:00")
+    store.conn.execute("DELETE FROM events WHERE method = 'cv_extract' AND producer_version = 'synth-cv-0.1'")
+    ev = evaluate_release(store, manifest, ts, "x", "2026-11-04", producer_version="synth-cv-0.1")
+    assert ev.dod("DoD-2").details["matched"] == 0
+    assert ev.dod("DoD-2").status == "fail"
 
 
 def test_full_synthetic_store_passes_every_dod_and_renders_every_line(ts):

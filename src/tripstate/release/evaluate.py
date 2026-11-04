@@ -112,6 +112,9 @@ def evaluate_release(store: Store, manifest: dict, ts: ThresholdSet, version: st
         hand[r["race_id"]].append(r)
     events = defaultdict(list)
     for r in store.rows("events"):
+        # Human truth has its own producer; scope only extracted candidates to the selected run.
+        if producer_version and r["method"] == "cv_extract" and r["producer_version"] != producer_version:
+            continue
         events[r["race_id"]].append(r)
     segs = defaultdict(list)
     for r in store.state_segments(producer_version=producer_version, include_unchartable=True):
@@ -134,6 +137,13 @@ def evaluate_release(store: Store, manifest: dict, ts: ThresholdSet, version: st
     s6 = [rid for rid in heldout if any(r.get("split") != "heldout" for r in hand.get(rid, []))]
     if s6:
         notes.append(f"S-6 violation: hand_charts.split disagrees with the manifest for {s6}")
+    missing_charts = [rid for rid in q16_pass if not any(r["method"] == "human_chart" for r in hand.get(rid, []))]
+    truth_problems = []
+    if missing_charts:
+        truth_problems.append(f"missing human hand charts for eligible held-out races {missing_charts}")
+    if s6:
+        truth_problems.append(f"S-6 split mismatch for held-out races {s6}")
+    truth_invalid = "; ".join(truth_problems)
 
     # --- DoD-6 ----------------------------------------------------------------------------------
     n_req, min_pass = int(ts["dod6_heldout_n"]), int(ts["dod6_min_pass"])
@@ -167,6 +177,8 @@ def evaluate_release(store: Store, manifest: dict, ts: ThresholdSet, version: st
                   "per_race": {s.race_id: {"uncovered_outside_iou": s.uncovered_outside_iou, "covered_iou": s.covered_iou, "rest_macro": s.rest_macro} for s in with_q7_scores}}
     if d6.status != "pass":
         d1 = DoD("DoD-1", "invalid", f"invalid because DoD-6 is {d6.status} (§6.3)", d1_details)
+    elif truth_invalid:
+        d1 = DoD("DoD-1", "invalid", truth_invalid, d1_details)
     elif hw.uncovered_outside_iou is None or hw.covered_iou is None:
         d1 = DoD("DoD-1", "invalid", "a DoD-1 mask has an empty union across the held-out set; revise the golden fixtures (D-28)", d1_details)
     elif hw.uncovered_outside_iou >= floor and hw.covered_iou >= floor:
@@ -206,6 +218,8 @@ def evaluate_release(store: Store, manifest: dict, ts: ThresholdSet, version: st
         notes.append(f"DoD-2: races without timeline anchors cannot convert fractions to seconds and were skipped: {unanchored}")
     if d6.status != "pass":
         d2 = DoD("DoD-2", "invalid", f"invalid because DoD-6 is {d6.status} (§6.3)", d2_details)
+    elif truth_invalid:
+        d2 = DoD("DoD-2", "invalid", truth_invalid, d2_details)
     elif n_truth < min_breaks:
         d2 = DoD("DoD-2", "invalid", f"only {n_truth} observable held-out BREAK starts (< {min_breaks}); manifest revision required (§6.1)", d2_details)
     elif p >= rec_min:
