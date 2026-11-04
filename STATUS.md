@@ -18,7 +18,8 @@ _Last updated: 2026-11-04 (agent scaffold, research pack, P1 draft cut)._ Update
 
 1. Has OD-1x, or any replay pull, happened since July 2026?
 2. Where do the replays and the notule corpus live? Paths or a mount are needed for `data/`.
-3. Do LeTrot's "Tracking" pages (per-runner tracking data at Vincennes) expose anything usable? If per-runner positional data exists officially, large parts of the CV plan are replaceable. Decide before P4.
+3. The signal gate is runnable: point `tools/signal_gate.py --corpus` at a runner-race CSV with closing odds and notules (see `protocols/SIGNAL-GATE`). Needs your corpus.
+4. Do LeTrot's "Tracking" pages (per-runner tracking data at Vincennes) expose anything usable? If per-runner positional data exists officially, large parts of the CV plan are replaceable. Decide before P4.
 4. Replay rights: Equidia terms were not read to completion. Confirm personal-use replay access is acceptable for the intended use.
 
 ## Blockers
@@ -50,6 +51,8 @@ _Last updated: 2026-11-04 (agent scaffold, research pack, P1 draft cut)._ Update
 - [x] M6 uncalibrated reference detector; golden manifest tool (§6.1, S-6); BORIS→hand_charts converter (RP-17)
 - [x] CI workflow, `tripstate` CLI (`ingest-video`, `synth-demo`, `evaluate`), audit fixes (`docs/AUDIT.md`)
 - [x] Seeding tool: `SeedingSession` state machine (keymap, auto-slowdown at flags, anchors, orientation, break review, first-past, recall, human-minutes) + `tools/seed_cli.py` (OpenCV window / headless script)
+- [x] Text-parse skeleton (`tripstate.textparse`): §11.2 lexicon as dimension assertions, candidate sets, §11.4 phases, negation/quote/other-subject scope, BREAK events, exclusions, reserved families; `tools/parse_notules.py`, `tools/lexicon_attest.py`
+- [x] Signal gate (`tripstate.signal`): prior-race indicators with leakage guard, numpy logistic regression vs market baseline, holdout + bootstrap CI + fold stability, pre-registered `decision.yaml`; `tools/signal_gate.py` (synthetic dry run and real corpus, KG-5 update)
 - [x] World-space simulator (`tripstate.synth.track/camera/world`): stadium track in metres, pinhole grandstand camera, 3-D vehicle boxes; `tools/geometry_study.py` → `docs/research/11-simulated-geometry.md`; projector gains `axis_source = rail`, `lateral_scale_mode = rail_fence_projective` with polyline datum and foot-point correction (RP-19…RP-25)
 - [x] Live seeding loop (`tripstate.seeding.live`): oracle / detector / SAM 2 engines, `FlagMonitor`, pause-on-flag, re-seed prompts, session timeline → `pilot_run.py --propagator session`
 - [x] Throwaway pilot stack (`tripstate.pilot`): ffmpeg frame source, synthetic video renderer, oracle + blob detectors, IoU tracker, seed→track assignment with flags, oracle + SAM 2 propagators, IDF1/IDSW/MOTA-lite, race runner → report, kill-gate aggregation; `tools/synth_video.py`, `pilot_run.py`, `pilot_report.py`; `make pilot-demo` runs the loop on synthetic video

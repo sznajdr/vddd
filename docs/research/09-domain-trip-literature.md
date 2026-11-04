@@ -12,6 +12,10 @@ Is there evidence that the states this project extracts (cover, parked, first-ov
 - **No regression study of parked/first-over effects on win probability** was found in searchable literature; no Swedish/French trot study of race tactics by position was found.
 - **Text can rival video for event spotting:** "Do We Need Large VLMs for Spotting Soccer Actions?" (IJCNLP-AACL 2025 SRW) uses timestamped commentary with LLM judges and claims comparable event detection to video-based spotters, training-free. ([arXiv 2506.17144](https://arxiv.org/html/2506.17144v2))
 
+## Tooling (2026-11-04)
+
+`tripstate.textparse` implements §11 as a dimension model; `tripstate.signal` implements the gate; both run end to end on a synthetic corpus (`tools/signal_gate.py --synthetic`).
+
 ## Implications for the spec
 
 1. **The taxonomy is grounded.** Cover (drafting) has a measured speed effect in horses; parked/first-over/pocket are the long-standing handicapping variables; US charts prove the states are chartable by humans at scale. Nothing found argues for adding or removing a v1 state.

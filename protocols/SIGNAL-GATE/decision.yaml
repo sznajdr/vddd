@@ -1,0 +1,16 @@
+# Pre-registered decision rule for the signal gate (RP-7, KG-5). Fix BEFORE running on the real corpus;
+# changes after a run must be recorded with a reason. Consumed by tools/signal_gate.py.
+k_prior: 3                  # prior races per runner used for indicators
+holdout_months: 12          # time-ordered holdout = last 12 months
+min_rows: 2000              # below this the verdict is "inconclusive"
+min_holdout_wins: 50
+min_logloss_gain_nats: 0.002  # per-runner log-loss improvement over the market baseline
+min_coef_z: 2.7             # |z| of an indicator in the holdout-fit model; Bonferroni for 7 indicators at 5 % (2.69)
+min_stable_folds: 3         # sign agreement across ALL rolling folds (multiplicity guard: 7 indicators are tested)
+min_ablation_gain_nats: 0.0005  # coefficient route: removing the indicator must worsen HOLDOUT log-loss by at least this
+# (a training-fit z alone is not evidence: on a null synthetic corpus z = 3.2 occurred with zero holdout contribution)
+n_folds: 3
+l2: 1.0
+bootstrap: 200              # race-level bootstrap resamples for the gain CI
+seed: 0
+indicator_features: [parked_any, parked_last, covered_any, leader_any, wide_any, break_any, detached_any]

@@ -16,6 +16,17 @@
 - Improvement in holdout log-loss ≥ a pre-registered minimum (suggest 0.002 nats/runner) **or** any trip indicator with a stable sign across yearly folds and |coef| > 2 × SE → **go**.
 - Nothing survives → **stop or reframe**: either the market prices trip already, or the text is too coarse to tell. The second case argues for CV only if the first can be ruled out.
 
+## Running it
+
+```bash
+python tools/signal_gate.py --synthetic 0.6 --out /tmp/sg.md          # dry run: injected signal -> GO
+python tools/signal_gate.py --synthetic 0.0 --out /tmp/sg.md          # dry run: no signal -> NO-GO
+python tools/signal_gate.py --corpus data/signal_gate/runners.csv --out data/signal_gate/report.md --json data/signal_gate/report.json --kill-gates spec/registers/kill_gates.yaml
+```
+The decision rule is `decision.yaml` next to this file; set it before the real run and record any later change with a reason. Features are prior-race indicators from `tripstate.textparse` (strict = resolved states; `parked_loose_any` also reported). The CSV needs `race_id, date, horse_id, saddle_no, finish_position, win, placed, odds, notule_runner_texte` (names remappable with `--columns`).
+
+Before the real run: `python tools/lexicon_attest.py --corpus data/signal_gate/runners.csv --out spec/registers/lexicon_attestation.yaml` re-measures `[C]` attestation; unattested families stay out.
+
 ## Output
 
 `data/signal_gate/report.md` with the tables; set KG-5 in `spec/registers/kill_gates.yaml`.
