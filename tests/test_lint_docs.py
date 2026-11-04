@@ -1,11 +1,12 @@
 """Documentation hygiene is enforced, not hoped for (tools/lint_docs.py)."""
 import subprocess
 import sys
+from importlib import import_module
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
-import lint_docs  # noqa: E402 -- import the repository tool after bootstrapping its directory
+lint_docs = import_module("lint_docs")
 
 
 def test_repository_docs_are_clean():
