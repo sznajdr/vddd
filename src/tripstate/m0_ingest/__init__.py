@@ -1,7 +1,7 @@
 """M0 — Ingest & Normalization (SPEC-2.0.0-draft §4 M0).
 
 Implemented: metadata normalization rules 1–6 (evidence-independent, allowed under DRAFT).
-Stub: video normalization (needs ffmpeg + replays).
+Video normalization implemented with ffmpeg (CFR, no interpolation, hashed, idempotent).
 """
 from tripstate.m0_ingest.metadata import (
     CONFLICT_CODES,

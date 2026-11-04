@@ -25,7 +25,7 @@ pipeline against it once frozen.
 | `src/tripstate/` | Python package. M0…M8 scaffolded; evidence-independent logic implemented. | Code |
 | `tests/` | Unit tests for the implemented logic and the freeze check. | Code |
 | `tools/` | CLI helpers for the human protocols and spec hygiene. | Code |
-| `docs/` | Architecture, risk register, glossary, per-module agent prompts. | Informative |
+| `docs/` | Architecture, risk register, glossary, per-module agent prompts. `docs/research/` = state-of-the-art notes with sources; `docs/STACK-2.0.md` = proposed default stack. | Informative |
 | `data/` | Local data layout (gitignored). See `data/README.md`. | — |
 
 ## Current phase

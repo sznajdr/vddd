@@ -1,6 +1,6 @@
 # M5 — State Machine
 
-**Spec:** §2.3–2.4, §3.4; ledger L-12, L-13, L-25; D-27. **Status:** classification table implemented + tested; smoothing stubbed.
+**Spec:** §2.3–2.4, §3.4; ledger L-12, L-13, L-25; D-27. **Status:** classification table (incl. §2.2 `order_ambiguous` → UNKNOWN, exact ties included), DETACHED overlay, tier hysteresis, min-duration smoothing of cover and states, lead recompute and segment emission implemented; synthetic-trajectory tests cover crossing, rail-uncovered gap, front/rear detachment, short occlusion, tier drift, lead changes, truncation at cuts and LOW_CONF inheritance (M5 DoD).
 
 | | |
 |---|---|

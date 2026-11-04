@@ -128,6 +128,14 @@ entries:
     value: null
     evidence: null
     date: null
+  - key: axis_neighbourhood_k
+    provisional: 0
+    instrument: "sheet_geometry.csv bend frame: lateral spread of the pack along a straight axis vs a local axis (research 05, RP-20)"
+    rule: "stay 0 unless the bend frame shows > 0.5 SW of axis-induced lateral error; then the smallest k that removes it"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
   - key: seeding_feasible
     provisional: null
     instrument: "sheet_seeding.csv: seconds to assign all saddle numbers from first stable wide-pan frame"

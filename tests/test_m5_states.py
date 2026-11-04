@@ -49,3 +49,12 @@ def test_d26_table_gap_is_flagged_not_guessed(ts):
     rs = classify_frame([g(1, 1.0, 0.0, 1), g(2, 2.0, 0.5, 2)], ts)
     by = {r.saddle_no: r for r in rs}
     assert by[1].state == "UNKNOWN" and by[1].reason == "table_gap_tier1_lead_covered"
+
+
+def test_exact_tie_is_unknown_not_tiebreak(ts):
+    # Equal l_sl: the saddle-number tiebreak must not decide LEADER vs RAIL_UNCOVERED.
+    rs = classify_frame([g(1, 0.0, 0.0, 1), g(2, 0.0, 0.0, 1)], ts)
+    assert {r.state for r in rs} == {"UNKNOWN"} and all(r.reason == "order_ambiguous" for r in rs)
+    # A tie that cannot change either state (two WIDE runners) stays classified.
+    rs = classify_frame([g(1, 5.0, 0.0, 1), g(2, 0.0, 2.0, 3), g(3, 0.05, 2.0, 3)], ts)
+    assert [r.state for r in rs] == ["LEADER", "WIDE", "WIDE"]

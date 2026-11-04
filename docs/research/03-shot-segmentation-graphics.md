@@ -1,0 +1,19 @@
+# 03 — Shot segmentation, replay detection, graphics overlays (M1)
+
+## Question
+How to produce contiguous `shots` rows with type ∈ {wide_pan, head_on, tight, replay_insert, graphic_fullscreen, other} and a graphics-overlay mask, with F1 ≥ 0.90 on boundaries and ≥ 0.95 wide-pan accuracy (M1 acceptance)?
+
+## Findings
+
+- **Shot boundaries:** TransNetV2 is the standard learned detector (3D convolutions + frame-similarity branch). Reported F1: 77.9 ClipShots, 96.2 BBC Planet Earth, 93.9 RAI; inference-only use, no training needed; the authors warn that novel "wild" transition types in TV content can catch it unprepared. SoccerNet-v2 defines the broadcast-sports version of the task with three transition types (abrupt, logo, smooth). ([TransNetV2 repo](https://github.com/jebin2/TransNetV2), [paper](https://alphaxiv.org/abs/2008.04838), [task page](https://cs.paperswithcode.com/task/camera-shot-boundary-detection))
+- **Shot type:** classic broadcast-soccer pipelines first remove replays via logo detection, then classify long / medium / close-up / out-of-field from colour-texture features; a sport-agnostic bag-of-visual-words + SVM approach also exists. No zero-shot CLIP shot-scale benchmark was found; the generic CLIP recipe is a prompt ensemble per class averaged over several wordings. SoccerNet-v2 annotates 13 camera types (main camera left/center/right, close-up corner, spider camera, goal-line, public, other, …) for 200 games, which is a useful naming reference. ([Shot classification in broadcast soccer](https://www.researchgate.net/publication/28211234_Shot_Classification_in_Broadcast_Soccer_Video), [generic sports shot classification](https://dl.acm.org/doi/pdf/10.1145/1734605.1734654), [SoccerNet-v2](https://arxiv.org/pdf/2011.13367), [devkit](https://github.com/SilvioGiancola/SoccerNetv2-DevKit))
+- **Replays:** in soccer, replay segments are bracketed by logo wipes (SoccerNet-v2 "logo" transitions) and often lack the scoreboard; patents use scoreboard absence as a replay cue. ([US7653131](https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7653131))
+- **Graphics overlays:** the patent literature converges on temporal static-region analysis (pixel accumulation maps / edges unchanged across frames) plus per-broadcaster positional priors and OCR for content; lower thirds get the same treatment. ([US7899250](https://patents.google.com/patent/US7899250), [US11568644](https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11568644))
+- **Zero-shot multimodal event spotting** in soccer broadcasts (2026) treats cuts, close-ups, replays and recaps as structure to be handled before spotting; multimodal LLMs rather than CLIP. ([arXiv 2610.37583](https://arxiv.org/html/2610.37583)) *(abstract only)*
+
+## Implications for the spec
+
+1. **RP-15 (proposed §13 default for M1):** TransNetV2 for cuts (threshold under `m1_shots.cut_thresh`) → per-shot CLIP zero-shot type with a prompt ensemble, calibrated on the OD-1x shot labels (leave-one-race-out as §4 M1 already requires) → temporal static-region detector for `graphic_overlay_mask_ref` → `replay_insert` from (slow-motion cadence via frame-difference statistics) ∧ (transition style) ∧ (overlay change), human-verified on OD-1x.
+2. **Prompt ensemble for Vincennes:** wide pan ≈ "a wide television shot of a harness race, many horses with sulkies on a track"; head-on ≈ "horses and sulkies trotting straight toward the camera"; tight ≈ "a close-up of one trotting horse and driver"; graphic ≈ "a full-screen results graphic with text"; other. Prompt texts are non-numeric → part of `extractor_version`, not the threshold set.
+3. **OD-1x step 3 already produces the fixture** this needs (shot change log with types). Keep it.
+4. **Low confidence → `other`** (not charted) stays; CLIP margins between the top two classes under `m1_shots.type_margin_min` map to `other`.

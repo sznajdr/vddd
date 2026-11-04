@@ -15,3 +15,17 @@
 | RP-9 | RECON §1 table rows for F-1 and §1.3 are broken by unescaped `|` inside inline math (`|w_X − w_Y|`, `~p95 of |…|`). Rendered table loses the Decision/Gate columns for those rows. | Written with escaped pipes in the ledger. | L-11, registry |
 | RP-10 | `anchor_duration_tolerance_s` is not explicitly retired in RECON §6 §7.1 list. | Removed in TS-0.0.0-provisional; replaced by the four per-start-type keys. | L-34 |
 | RP-11 | **D-26 opens a classification-table gap** (owner decision). Cover is now tier-independent, so a tier-1 runner with no tier-1 runner ahead (the 1.2.0 `LEADER`) can be covered by a tier-2 runner slightly ahead within `cover_lat_sw`. §2.3 has no row for "tier 1, rank 1 in tier, covered". Found by the reference implementation (`tripstate.m5_states.classify`). | Options: (a) `LEADER` keeps precedence and records `covered = true` (leader-by-rail with outside cover is a real position); (b) new state. Until decided, the code emits `UNKNOWN` + reason `table_gap_tier1_lead_covered`, per prime directive. Recommendation: (a). | L-12; `src/tripstate/m5_states/README.md` |
+
+## Research-driven proposals (2026-11-04, see `docs/research/`) — owner verdict needed
+
+| ID | Proposal | Evidence | Where |
+|---|---|---|---|
+| RP-12 | **M3 default = click-seeded mask propagation (SAM 2 family).** Seeding clicks become point prompts with object id = saddle number; the tracklet *is* the prompt's object; re-seed flags from mask confidence / overlap. Detector + BoT-SORT with post-hoc click assignment becomes the configured alternative. No change to D-01, D-02 or the tool DoD; changes §13 only. | research 02 | §13; `docs/agent-prompts/M3-SEEDING.md` |
+| RP-13 | **Pilot detector = open-vocabulary (Grounding DINO / OWLv2), SAM 3 optional.** Zero training; prompt list hashed into `extractor_version`. | research 01 | `protocols/PILOT-5` |
+| RP-14 | **§6.2 adds segmental edit score and F1@{10,25,50} as descriptive metrics** (never floors). Segment IoU cannot see flicker; these can. Implemented in `tripstate.evaluation.metrics`. | research 07 | L-29 addendum |
+| RP-15 | **M1 default = TransNetV2 cuts → CLIP zero-shot shot type (prompt ensemble) → static-region overlay mask.** Prompt texts are non-numeric (`extractor_version`); margins/thresholds under `m1_shots`. | research 03 | §13 |
+| RP-16 | **§12 register entry: pose-based gait classification (SuperAnimal-Quadruped keypoints) for breaks, v1.5**, trained on accumulated accepted/rejected candidates; likely needs tight shots. | research 04 | §12 |
+| RP-17 | **Hand-charting in BORIS** (ethogram = state set; subjects = saddle numbers; export → `hand_charts` via a converter). Removes the need for a charting UI. | research 08 | §5.2 note; `protocols/HAND-CHARTING` |
+| RP-18 | **Schema-additive columns on `id_assignments`: `seed_x_px`, `seed_y_px`, `seed_box_ref`** so every seeding click doubles as future re-ID/OCR training data at zero operator cost (the D-01 rationale, made concrete). | research 06 | §9 (minor) |
+| RP-19 | **Scale aid from the two track curves (rail and outer fence) for `sw_ratio` per shot**, if OD-1x step 4 shows lateral compression (RP-5). Two parallel lines at known real separation give a lateral scale without a homography; needs an explicit §3.3 carve-out. | research 05 | §3.3 |
+| RP-20 | **Local-neighbourhood principal axis on bends** (`geometry.axis_neighbourhood_k`, EG) to cut the straight-axis lateral error. | research 05 | §3.1 |

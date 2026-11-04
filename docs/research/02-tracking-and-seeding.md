@@ -1,0 +1,32 @@
+# 02 — Tracking and human-seeded identity (M3, D-01)
+
+## Question
+How does one click per runner on the first stable wide-pan frame become a race-long identity track that survives pans, occlusion clusters and shot cuts, with re-seeds only on flags?
+
+## Findings
+
+### Promptable segmentation as the seeding mechanism
+- **SAM 2** tracks a prompted object (point, box or mask) through video with a streaming memory; prompts can be added mid-video to correct drift; a lost track needs a new prompt. In Meta's own data engine, putting SAM 2 in the annotation loop cut annotation time to ~4.5 s per frame, an ~8.4× speed-up. ([SAM 2 paper](https://arxiv.org/pdf/2408.00714), [Ultralytics SAM 2 page](https://docs.ultralytics.com/models/sam2), [Labellerr workflow docs](https://docs.labellerr.com/features/sam-2-object-tracking))
+- **SAMannot** (2026): open-source, local, memory-efficient human-in-the-loop video instance segmentation built on SAM 2. ([arXiv 2601.11301](https://arxiv.org/pdf/2601.11301)) *(unverified beyond abstract)*
+- **Multi-object SAM2 trackers:** SAMURAI (Kalman-filter memory selection, single object), DAM4SAM (distractor-aware memory, CVPR 2025; reports +2% over SAMURAI on DiDi), SAM2MOT (zero-shot MOT by segmentation with a cross-object interaction module and trajectory manager, April 2025), SAMURAI++ (CVPR 2026, extends to MOT with identity preservation on MOT17), Seg2Track++, HiM2SAM (long-term). A December 2025 benchmark paper compares SAM2-based trackers on FMOX. ([SAM2MOT](https://www.alphaxiv.org/abs/2504.04519), [DAM4SAM](https://openaccess.thecvf.com/content/CVPR2025/papers/Videnovic_A_Distractor-Aware_Memory_for_Visual_Object_Tracking_with_SAM2_CVPR_2025_paper.pdf), [SAMURAI++](https://openaccess.thecvf.com/content/CVPR2026F/papers/Yang_Extending_Segment_Anything_Model_2_to_Multi-Object_Tracking_by_Optimizing_CVPRF_2026_paper.pdf), [FMOX benchmark](https://arxiv.org/pdf/2512.09633), [Awesome-SAM2 list](https://github.com/GuoleiSun/Awesome-SAM2)) *(numbers from abstracts)*
+- **Point trackers:** CoTracker3 tracks points through occlusion and out-of-view, online or offline, and beats BootsTAPIR/LocoTrack with far less training data; a reported >30 pp drop from static to dynamic subsets suggests weakness on highly dynamic scenes. ([CoTracker3](https://cotracker3.github.io), [arXiv 2410.11831](https://ar5iv.labs.arxiv.org/html/2410.11831))
+
+### Training-free tracking-by-detection for sports
+- **McByte++** (arXiv 2608.15688, Aug 2026): training-free pipeline of lightweight mask propagation + conditional camera-motion compensation + online re-identification; claims highest HOTA/IDF1 among MOT approaches on its sports benchmarks. Extends McByte ("No Train Yet Gain", arXiv 2506.01373). ([arXiv abs](https://arxiv.org/abs/2608.15688), [McByte](https://awesomepapers.io/computer-vision/papers/2506.01373)) *(abstract only; arxiv not fetchable from this session)*
+- **Classic trackers on sports data:** on SportsMOT, ByteTrack 64.1 HOTA; MixSort-Byte 65.7; OC-SORT 73.7; MixSort-OC 74.1. Appearance cues help because players look alike and move fast, which is also true of trotters. ([MixSort repo](https://github.com/MCG-NJU/MixSort), [SportsMOT](https://arxiv.org/pdf/2304.05170))
+- **BoT-SORT** adds camera-motion compensation (image registration → Kalman correction) and is the component designed for panning; vendors advise OC-SORT when motion is non-linear; sparse-feature CMC is unreliable on low-texture backgrounds. No controlled broadcast-panning benchmark was found. ([BoT-SORT](https://arxiv.org/pdf/2206.14651), [Roboflow tracker comparison](https://trackers.roboflow.com/latest/trackers/comparison/))
+
+### Horse-specific
+- Ng et al. 2023 built GMOT on FairMOT (joint detection + re-ID) and found camera switches and sprint blur the hard cases. ([ScienceDirect](https://www.sciencedirect.com/science/article/abs/pii/S0020025523005364))
+- Helmet-based re-ID (Surrey, CVMP 2024) argues helmets are the stable cue across rotations; proof of concept on one race, six cameras, five jockeys. ([Surrey](https://openresearch.surrey.ac.uk/esploro/outputs/conferenceProceeding/Detection-and-Re-Identification-in-the-case/99925861902346))
+
+## Implications for the spec
+
+1. **RP-12 (proposed): M3 default = click-seeded mask propagation.** The seeding tool's click on runner X at frame f becomes a SAM 2 point prompt with object id = saddle number; the memory tracker propagates X's mask through the wide-pan shot; the `horse_sulky` box is the mask's bbox (or the union with a detector box). Identity never has to be "assigned to a tracklet" after the fact: the tracklet *is* the prompt's object. This matches D-01 (identity is human-seeded), D-02 (one shot type) and the tool DoD (click → saddle number) better than detector + ByteTrack + post-hoc assignment.
+   - Re-seed flags = mask confidence drop, mask area jump, or two objects' masks overlapping by > `m3_track.mask_overlap_flag` for > `m3_track.overlap_flag_s`.
+   - Across a cut (EC-01) the shot ends; the next wide-pan shot starts with propagation from the last known masks only if the tool's heuristic says the camera did not reposition; otherwise it asks for re-seeds of flagged runners. The spec already allows this ("re-seed only flagged runners").
+   - Risk R-15: throughput with 14 objects. SAM 2's memory cost scales with objects; DAM4SAM/SAMURAI-style memory selection and SAM2MOT-style lifecycle management are the mitigations. Measure in the pilot.
+2. **Fallback = BoT-SORT with GMC on the detector output**, with clicks assigned to tracklets at seed frames (the 1.2.0 design). Keep it as the configured alternative so the pilot can compare both on the same races.
+3. **Appearance re-ID is a flag source, not an identity source** in v1 (D-01): an appearance embedding may raise `id_suspect`-type flags for the operator but may not assign identity. McByte++'s online re-ID fits that role.
+4. **Threshold namespace `m3_track`:** `track_high_thresh`, `track_low_thresh`, `new_track_thresh`, `track_buffer_s` (coasting, must equal `occl_max_s` semantics), `match_thresh`, `gmc_method`, `mask_conf_flag`, `mask_overlap_flag`, `overlap_flag_s`.
+5. **Determinism (D-32):** memory trackers are deterministic given fixed prompts and frames on the same environment; record model weights hash and prompt coordinates (already in `id_assignments.seed_frame/seed_video_s`; add `seed_x_px`, `seed_y_px` columns — schema-additive).

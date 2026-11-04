@@ -1,6 +1,6 @@
 # M0 — Ingest & Normalization
 
-**Spec:** SPEC-2.0.0-draft §4 M0 (+ L-18…L-20). **Status:** metadata normalization implemented and tested; video normalization stubbed (needs replays).
+**Spec:** SPEC-2.0.0-draft §4 M0 (+ L-18…L-20). **Status:** metadata normalization and ffmpeg video normalization (CFR via the `fps` filter, no interpolation, ffprobe sidecars, hashes, idempotent re-ingest, corrupt-file handling) implemented and tested on a synthetic clip; the 3-replay acceptance run waits for OD-1x footage.
 
 | | |
 |---|---|

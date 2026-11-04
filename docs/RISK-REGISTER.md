@@ -18,3 +18,6 @@ Ranked by (likelihood × damage). "Test" names the cheapest falsifier. Status as
 | R-12 | **Selection bias from ≤ 14 cap and big-race realizations** | corpus misses the deepest pools | acknowledged (DR-11), `qc.realization` quantifies | accepted |
 | R-13 | **D-26 table gap** (tier-1 leader covered by outside runner) | undefined state | reference impl emits UNKNOWN + reason; owner decides | open (RP-11) |
 | R-14 | **Owner time**: ~100 h to a 600-race corpus at 5 min/race + charting | project stalls | DoD-3 pilot distribution; DR-12 2× playback | untested |
+| R-15 | **SAM-based seeded tracking too slow at 14 objects** (SAM 3 near real-time at ~5 objects; SAM 2 memory scales with objects) | seeding design falls back to detector+tracker with post-hoc assignment | pilot timing on one OD-1x replay with 14 prompts | untested (research 02) |
+| R-16 | **No public horse-racing detection/tracking data exists**; the only academic set is 15 private videos | every label is owner time; no shortcut | confirmed by search | accepted (research 01) |
+| R-17 | **Licence constraints** (Ultralytics AGPL-3.0; Meta SAM terms) for any future distribution | stack substitution | read licences before production | open (STACK-2.0) |

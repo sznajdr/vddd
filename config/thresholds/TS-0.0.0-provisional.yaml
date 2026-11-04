@@ -20,6 +20,8 @@ geometry:
   cover_max_sl: {value: 2.0, used_in: "§2.2"}
   cover_lat_sw: {value: 0.8, eg: true, used_in: "§2.2 (L-11, D-26)"}
   detach_sl: {value: 6.0, used_in: "§2.4 (value unchanged; OD-1x only confirms rarity, see detach_sl_prevalence)"}
+  rail_ref_conf_min: {value: 0.5, used_in: "EC-13 (M4 namespaced rail-reference confidence; module default, tuned in §7)"}
+  axis_neighbourhood_k: {value: 0, eg: true, used_in: "§3.1 principal axis fitted on k nearest runners (0 = whole pack); research 05 bends proposal"}
 
 smoothing:
   min_state_s: {value: 1.0, used_in: "§3.4"}
@@ -61,8 +63,29 @@ qc:
 yield:
   stratum_yield_review_factor: {value: 0.5, eg: true, used_in: "§6.2 per-stratum chartable trigger (D-35)"}
 
-# Module-defined namespaces (populated when the module is built; must exist before acceptance, §7.1):
-m1_shots: {}
-m2_detect: {}
-m3_track: {}
-m6_events: {}
+# Module-defined namespaces (§7.1): keys proposed from the research pack (docs/research/). Values are
+# module defaults to be tuned in §7 calibration; they are NOT physics and NOT OD-1x evidence-gated.
+m1_shots:
+  cut_thresh: {value: 0.5, used_in: "TransNetV2 transition probability -> cut (research 03)"}
+  type_margin_min: {value: 0.10, used_in: "CLIP top-1 vs top-2 margin below which shot type -> other"}
+  min_shot_s: {value: 0.5, used_in: "shots shorter than this merge into neighbours before typing"}
+  static_region_frames: {value: 75, used_in: "frames over which a pixel must be unchanged to count as graphic overlay"}
+m2_detect:
+  conf_min: {value: 0.25, used_in: "detector confidence floor"}
+  nms_iou: {value: 0.7, used_in: "NMS IoU"}
+  box_expand_sulky: {value: 1.6, used_in: "pilot only: expand a horse box rearward by this factor of its length to cover the sulky"}
+m3_track:
+  track_high_thresh: {value: 0.5, used_in: "first-association detection confidence (ByteTrack family)"}
+  track_low_thresh: {value: 0.1, used_in: "second-association floor"}
+  new_track_thresh: {value: 0.6, used_in: "confidence to start a new tracklet (production: new tracklets are flags, not identities)"}
+  track_buffer_s: {value: 1.5, used_in: "coasting without support; MUST equal occl_max_s semantics (EC-08)"}
+  match_thresh: {value: 0.8, used_in: "IoU/association threshold"}
+  mask_conf_flag: {value: 0.5, used_in: "SAM2-propagated mask confidence below which the operator is flagged (research 02)"}
+  mask_overlap_flag: {value: 0.5, used_in: "IoU between two runners' masks above which a swap is suspected"}
+  overlap_flag_s: {value: 0.6, used_in: "duration of mask overlap before flagging"}
+m6_events:
+  osc_window_s: {value: 1.0, used_in: "window for bbox vertical-oscillation statistics"}
+  osc_change_z: {value: 3.0, used_in: "z-score of oscillation regime change that opens a candidate"}
+  rank_vel_window_s: {value: 1.0, used_in: "window for longitudinal-rank velocity"}
+  rank_vel_z: {value: 3.0, used_in: "z-score of rank-velocity anomaly"}
+  candidate_merge_s: {value: 2.0, used_in: "candidates closer than this merge into one"}

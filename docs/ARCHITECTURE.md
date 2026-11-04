@@ -6,7 +6,7 @@
 replay + metadata
       │
       ▼
- M0 ingest ──────────── metadata rules IMPLEMENTED · video normalization stub
+ M0 ingest ──────────── metadata rules + ffmpeg video normalization IMPLEMENTED
       │
       ▼
  M1 shots ───────────── stub (needs OD-1x shot labels)            ─┐
@@ -21,16 +21,17 @@ replay + metadata
  M4 geometry ────────── tiering + cover IMPLEMENTED · projection stub      ─┘
       │                                                                     ┐ G-3
       ▼                                                                     │
- M5 states ──────────── classification IMPLEMENTED · smoothing stub        ─┘
+ M5 states ──────────── classification + smoothing + segments IMPLEMENTED  ─┘
       │
       ▼
  M6 events ──────────── positions_lost IMPLEMENTED · detector stub
       │
       ▼
- M7 QC ──────────────── gates + stratum yield IMPLEMENTED · SHOT_GAP/runner_qc stub
+ M7 QC ──────────────── gates + yield + SHOT_GAP + coverage IMPLEMENTED · runner_qc stub
       │
       ▼
  M8 storage ─────────── canonical export IMPLEMENTED · DDL drafted · store stub
+ evaluation ─────────── §6.2 metrics + §6.4 audit sampler IMPLEMENTED (tripstate.evaluation)
 ```
 
 "IMPLEMENTED" means a pure-function reference implementation of a structurally frozen rule, reading every number from a threshold set. None of it is calibrated. None of it has seen a frame of video.
