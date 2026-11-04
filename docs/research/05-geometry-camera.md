@@ -14,6 +14,10 @@ Does the field offer anything better than pack-relative coordinates for a pannin
 
 With 0.3 px box jitter and ~4 px displacements per 0.4 s window, the per-frame motion axis tilted by up to 7° on individual frames. Because `Δw ≈ (SL/SW)·l·sin δ`, a 7° tilt displaces a runner 5 SL back by ≈ 1.7 SL-equivalents = ~5 SW: every lane merges and the frame's tiers go `UNKNOWN`. The requirement implied by `same_tier_sw = 0.6` on a 5 SL pack is about **1° axis accuracy**. Fixes applied: length-weighted axial mean, minimum displacement `axis_min_vector_sl`, temporal smoothing `axis_smooth_s` (RP-21). This is independent of RP-5 and compounds it.
 
+## Simulator results (2026-11-04)
+
+See `11-simulated-geometry.md`: lateral compression ≈ height/depth; linear two-line scale fails under perspective; projective lateral coordinate + rail-line axis + polyline datum + foot-point correction restore tiering in the model (RP-19 refined, RP-20 resolved, RP-22, RP-23); elevation per section bounds what any method can do (RP-24).
+
 ## Implications for the spec
 
 1. **The homography ban (§3.3) is justified by the literature**, not only by caution: every working calibration method assumes a marked template. Re-entry remains conditional on a calibration source (§12).

@@ -74,9 +74,10 @@ class RunnerGeometry:
 class FrameGeometry:
     t: float
     sl_px: float | None
-    axis: tuple[float, float] | None     # u_long in image coordinates
-    axis_method: str                     # 'motion' | 'pca' | 'none'
-    conf: float
+    sw_px: float | None = None
+    axis: tuple[float, float] | None = None     # u_long in image coordinates
+    axis_method: str = "none"                   # 'motion' | 'pca' | 'none'
+    conf: float = 0.0
     runners: list[RunnerGeometry] = field(default_factory=list)
 
 
@@ -110,6 +111,58 @@ def _canonical(u: np.ndarray) -> np.ndarray:
     return u if u[0] > 0 else -u
 
 
+def _line_intersection(p: np.ndarray, d: np.ndarray, q: np.ndarray, e: np.ndarray) -> np.ndarray | None:
+    """Intersection of lines p + s·d and q + t·e (2-D); None when parallel."""
+    den = d[0] * e[1] - d[1] * e[0]
+    if abs(den) < 1e-9:
+        return None
+    s = ((q[0] - p[0]) * e[1] - (q[1] - p[1]) * e[0]) / den
+    return p + s * d
+
+
+def projective_lateral(point: np.ndarray, u_lat: np.ndarray, rail_p: np.ndarray, rail_d: np.ndarray,
+                       fence_p: np.ndarray, fence_d: np.ndarray, width_sl: float) -> float | None:
+    """Lateral distance from the rail in SL for an image point, from a 1-D projective map along the
+    lateral image line through the point: rail (d = 0), fence (d = width_sl) and the horizon (d = ∞, the
+    vanishing point of the two track lines, assumed on a horizontal horizon = no camera roll).
+    d(t) = K / (t - t_h) - d0 with t the coordinate along u_lat. Returns None if degenerate."""
+    v = _line_intersection(rail_p, rail_d, fence_p, fence_d)
+    if v is None:
+        return None
+    r = _line_intersection(point, u_lat, rail_p, rail_d)
+    f = _line_intersection(point, u_lat, fence_p, fence_d)
+    h = _line_intersection(point, u_lat, v, np.array([1.0, 0.0]))
+    if r is None or f is None or h is None:
+        return None
+    t_r, t_f, t_h = float((r - point) @ u_lat), float((f - point) @ u_lat), float((h - point) @ u_lat)
+    if abs(t_r - t_f) < 1e-9 or abs(t_f - t_h) < 1e-9 or abs(t_r - t_h) < 1e-9:
+        return None
+    d0 = width_sl * (t_f - t_h) / (t_r - t_f)
+    k = (t_r - t_h) * d0
+    t_p = 0.0  # the point itself
+    if abs(t_p - t_h) < 1e-9:
+        return None
+    return k / (t_p - t_h) - d0
+
+
+def nearest_on_polyline(point: np.ndarray, poly: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Closest point on a polyline (N, 2) to `point` and the unit direction of that segment."""
+    best = None
+    for a, b in pairwise(poly):
+        ab = b - a
+        L2 = float(ab @ ab)
+        if L2 < 1e-12:
+            continue
+        s = float(np.clip(((point - a) @ ab) / L2, 0.0, 1.0))
+        q = a + s * ab
+        d = float(np.linalg.norm(point - q))
+        if best is None or d < best[0]:
+            best = (d, q, ab / math.sqrt(L2))
+    if best is None:
+        return poly[0], np.array([1.0, 0.0])
+    return best[1], best[2]
+
+
 def lateral_unit(u_long: np.ndarray, rail_side: str) -> np.ndarray:
     """Image coordinates (y down). Visual left of travel = (u_y, -u_x). Increasing w must point away
     from the rail: rail on the left -> u_lat points right; rail on the right -> u_lat points left."""
@@ -139,6 +192,10 @@ class ShotProjector:
         self.tie = float(ts["rank_tie_sl"])
         self.k_local = int(ts.get("axis_neighbourhood_k", 0))
         self.min_vec_sl = float(ts.get("axis_min_vector_sl", 0.05))   # ignore displacements shorter than this (jitter)
+        self.lateral_scale = str(ts.get("lateral_scale_mode", "sw_ratio"))   # sw_ratio | rail_fence | rail_fence_projective (RP-19)
+        self.axis_source = str(ts.get("axis_source", "motion"))               # motion | rail (RP-22: rail-line direction prior)
+        self.half_width_sw = float(ts.get("vehicle_half_width_sw", 0.5))     # RP-23 foot-point correction (projective mode)
+        self.track_width_sl = float(ts.get("track_width_sl", 5.8))           # rail-to-fence width in SL (track constant)
         self.smooth_s = float(ts.get("axis_smooth_s", 1.0))             # EMA time constant on the doubled-angle axis
         self._axis_state: np.ndarray | None = None                       # smoothed (cos 2θ, sin 2θ)
         self._axis_state_method = "none"
@@ -188,11 +245,16 @@ class ShotProjector:
         return _canonical(np.array([math.cos(half), math.sin(half)]))
 
     def project(self, t: float, boxes: list[Box], rail_ref_px: tuple[float, float] | None = None,
-                rail_ref_conf: float | None = None, all_saddles: list[int] | None = None) -> FrameGeometry:
+                rail_ref_conf: float | None = None, all_saddles: list[int] | None = None,
+                fence_ref_px: tuple[float, float] | None = None,
+                rail_dir_px: tuple[float, float] | None = None,
+                fence_dir_px: tuple[float, float] | None = None,
+                rail_polyline_px: np.ndarray | None = None,
+                fence_polyline_px: np.ndarray | None = None) -> FrameGeometry:
         cents = {b.saddle_no: b.centroid for b in boxes}
         saddles = sorted(cents)
         missing = [s for s in (all_saddles or []) if s not in cents]
-        frame = FrameGeometry(t, None, None, "none", 0.0)
+        frame = FrameGeometry(t, None, axis=None, axis_method="none", conf=0.0)
 
         def degenerate() -> FrameGeometry:
             frame.runners = [RunnerGeometry(s, None, None, None, None, None, False, None, None, 0.0, True) for s in saddles]
@@ -209,33 +271,75 @@ class ShotProjector:
         sw = sl * self.sw_ratio
         pts = np.array([cents[s] for s in saddles], dtype=float)
         vecs = self._motion_vectors(t, cents)
-        u, method, conf = self._axis(vecs, pts, sl)
+        if self.axis_source == "rail" and rail_dir_px is not None and np.linalg.norm(rail_dir_px) > 1e-9:
+            u = _canonical(np.asarray(rail_dir_px, float) / np.linalg.norm(rail_dir_px))
+            method, conf = "rail", float(rail_ref_conf if rail_ref_conf is not None else 1.0)
+        else:
+            u, method, conf = self._axis(vecs, pts, sl)
         if u is None:
             return degenerate()
-        u = self._smooth(u, conf, t, method)
+        if method != "rail":      # the rail-line direction is a measurement, not a noisy estimate: never lag it
+            u = self._smooth(u, conf, t, method)
+        else:
+            self._axis_state, self._axis_state_method, self._last_t = None, "rail", t
         u_long = u * self.cal.travel_direction_sign
         u_lat = lateral_unit(u_long, self.cal.rail_side)
+        if self.lateral_scale == "rail_fence" and rail_ref_px is not None and fence_ref_px is not None:
+            # RP-19: lateral pixel scale from two track lines at a known separation (track_width_sl SL),
+            # independent of sw_ratio. SW_px = sep_px * (SW_world / width_world) = sep_px * sw_ratio / track_width_sl.
+            sep = abs(float((np.array(fence_ref_px) - np.array(rail_ref_px)) @ u_lat))
+            if sep > 1e-6:
+                sw = sep * self.sw_ratio / self.track_width_sl
+        frame.sw_px = sw
         frame.axis, frame.axis_method, frame.conf = (float(u_long[0]), float(u_long[1])), method, conf
 
         origin = np.median(pts, axis=0)
         rel = pts - origin
-        if self.k_local > 0 and len(vecs) >= self.min_vec:  # local axis per runner (RP-20), longitudinal only
-            l_vals = []
+        local_axes: dict[int, np.ndarray] = {}
+        if self.k_local > 0 and len(vecs) >= self.min_vec:  # local axis per runner (RP-20): longitudinal AND lateral
             for i, s in enumerate(saddles):
                 d = np.linalg.norm(pts - pts[i], axis=1)
                 near = [saddles[j] for j in np.argsort(d)[: self.k_local + 1] if saddles[j] in vecs]
                 ul, _ = _axial_mean(np.stack([vecs[n] for n in near]), self.trim_deg) if len(near) >= 2 else (None, 0.0)
-                ul = _canonical(ul) * self.cal.travel_direction_sign if ul is not None else u_long
-                l_vals.append(float(rel[i] @ ul) / sl)
-            l = dict(zip(saddles, l_vals))
-        else:
-            l = {s: float(rel[i] @ u_long) / sl for i, s in enumerate(saddles)}
-        w = {s: float(rel[i] @ u_lat) / sw for i, s in enumerate(saddles)}
+                local_axes[s] = _canonical(ul) * self.cal.travel_direction_sign if ul is not None else u_long
+        l = {s: float(rel[i] @ local_axes.get(s, u_long)) / sl for i, s in enumerate(saddles)}
+        w = {s: float(rel[i] @ lateral_unit(local_axes.get(s, u_long), self.cal.rail_side)) / sw for i, s in enumerate(saddles)}
 
         rail_w = rail_conf = None
         if rail_ref_px is not None and rail_ref_conf is not None:
             rail_w = float((np.array(rail_ref_px) - origin) @ u_lat) / sw
             rail_conf = float(rail_ref_conf)
+        if (self.lateral_scale == "rail_fence_projective" and rail_ref_px is not None and fence_ref_px is not None
+                and rail_dir_px is not None and fence_dir_px is not None and rail_ref_conf is not None):
+            # RP-19 (refined): perspective-correct lateral coordinate from the rail and fence lines and their
+            # vanishing point; w = distance from the rail in SW, so rail_ref_w = 0 and lane 0 sits at +0.5.
+            rp, rd = np.array(rail_ref_px, float), np.array(rail_dir_px, float)
+            fp, fd = np.array(fence_ref_px, float), np.array(fence_dir_px, float)
+            w_proj: dict[int, float] = {}
+            box_by = {b.saddle_no: b for b in boxes}
+            for i, s in enumerate(saddles):
+                if rail_polyline_px is not None and fence_polyline_px is not None and len(rail_polyline_px) > 1 and len(fence_polyline_px) > 1:
+                    # local datum (bends): nearest rail / fence segment to the runner's foot point
+                    rp_i, rd_i = nearest_on_polyline(pts[i], np.asarray(rail_polyline_px, float))
+                    fp_i, fd_i = nearest_on_polyline(pts[i], np.asarray(fence_polyline_px, float))
+                    rd_i = _canonical(rd_i) * self.cal.travel_direction_sign
+                else:
+                    rp_i, rd_i, fp_i, fd_i = rp, _canonical(rd) * self.cal.travel_direction_sign, fp, fd
+                ul_i = lateral_unit(rd_i, self.cal.rail_side)
+                # RP-23 foot point: the bbox bottom is the vehicle's NEAR ground edge, which slopes like the rail
+                # under pan; move from (mid-x, max-y) up to that edge at mid-x, then from the near edge to the
+                # vehicle centre line by half a vehicle width (sign: the near edge has larger image y).
+                b = box_by[s]
+                slope = abs(rd_i[1] / rd_i[0]) if abs(rd_i[0]) > 1e-9 else 0.0
+                foot = np.array([pts[i][0], pts[i][1] - min(slope, 1.0) * (b.x2 - b.x1) / 2.0])
+                dd = projective_lateral(foot, ul_i, rp_i, rd_i, fp_i, fd_i, self.track_width_sl)
+                if dd is not None:
+                    w_near = dd / self.sw_ratio
+                    w_proj[s] = w_near - self.half_width_sw * (1.0 if ul_i[1] > 0 else -1.0)
+            if len(w_proj) == len(saddles):
+                w = w_proj
+                rail_w = 0.0
+                frame.sw_px = None  # lateral scale is not a single pixel factor in this mode
 
         order = sorted(saddles, key=lambda s: (-l[s], s))
         rank = {s: i + 1 for i, s in enumerate(order)}

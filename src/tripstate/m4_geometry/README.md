@@ -1,6 +1,6 @@
 # M4 — Pack-Space Geometry
 
-**Spec:** §2.2, §3, EC-13; 2.0.0 ledger L-10, L-11; D-26. **Status:** tiering, cover and principal-axis projection (`ShotProjector`: motion axis with PCA fallback, calibration-driven orientation, SL/SW normalisation, ranks, ties, clusters, rail attachment) implemented and tested on synthetic renders; pixel-space rail detection is supplied by the caller. Lateral scale remains evidence-gated (RP-5).
+**Spec:** §2.2, §3, EC-13; 2.0.0 ledger L-10, L-11; D-26. **Status:** tiering, cover and principal-axis projection (`ShotProjector`: motion axis with PCA fallback, calibration-driven orientation, SL/SW normalisation, ranks, ties, clusters, rail attachment) implemented and tested on synthetic renders; pixel-space rail detection is supplied by the caller. Lateral scale remains evidence-gated (RP-5). Options from the simulator study (research 11): `axis_source = rail`, `lateral_scale_mode = rail_fence_projective` with rail/fence polylines and the RP-23 foot-point correction; defaults stay as the spec states until the owner adopts them.
 
 | | |
 |---|---|

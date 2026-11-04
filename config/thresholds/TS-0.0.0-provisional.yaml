@@ -26,6 +26,10 @@ geometry:
   axis_pca_conf: {value: 0.6, used_in: "§3.1 confidence assigned to PCA-fallback frames"}
   axis_trim_deg: {value: 45, used_in: "§3.1 outlier trim for motion vectors"}
   pack_min_visible: {value: 3, used_in: "§3 / EC-02 fewer visible runners -> conf 0"}
+  axis_source: {value: motion, used_in: "§3.1 axis estimate: motion (runner displacements, biased by pan/zoom when the camera tracks well) or rail (rail-line direction prior; RP-22)"}
+  vehicle_half_width_sw: {value: 0.5, used_in: "RP-23 foot-point correction in projective lateral mode (bbox bottom = near edge of the vehicle)"}
+  lateral_scale_mode: {value: sw_ratio, used_in: "§3.2 lateral scale: sw_ratio (SW = SL·sw_ratio), rail_fence (linear two-line scale; wrong under strong perspective), rail_fence_projective (1-D projective lateral coordinate from rail, fence and their vanishing point; RP-19 refined)"}
+  track_width_sl: {value: 5.8, eg: true, used_in: "RP-19 rail-to-fence width in sulky lengths (ASSUMED 25 m / 4.3 m; measure on a track plan or OD-1x)"}
   axis_min_vector_sl: {value: 0.05, used_in: "§3.1 displacements shorter than this fraction of SL are ignored for the motion axis (jitter guard)"}
   axis_smooth_s: {value: 1.0, used_in: "§3.1 time constant of the axis smoothing; RP-21 axis-accuracy requirement"}
   axis_neighbourhood_k: {value: 0, eg: true, used_in: "§3.1 principal axis fitted on k nearest runners (0 = whole pack); research 05 bends proposal"}

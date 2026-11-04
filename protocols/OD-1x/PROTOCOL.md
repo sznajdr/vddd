@@ -44,6 +44,7 @@ Pick three wide-pan frames per race: **near straight**, **far straight**, **a be
 3. Measure the lateral separation of a runner sitting "off the wheel" in a real cover position behind a runner in the next lane. Record as `cover_lat_in_sl`.
 4. Note which side of the screen the rail is on (RP-8).
 5. Note whether any longitudinal gap ≥ 6 SL exists anywhere in the frame (F-3 prevalence).
+6. **Per track section (RP-24):** estimate the view angle (0° = looking along the track, 90° = side-on), the apparent fence-to-rail separation in pixels at the pack, whether both lines are visible, and which camera position covers the section (the simulator predicts lane gaps of ≈ 0.4 SW in front of the stands and ≈ 0.05 SW on the far straight from one 18 m camera — see `docs/research/11-simulated-geometry.md`).
 
 Record in `sheet_geometry.csv`. `tools/instantiate_eg.py` converts SL to SW using the configured `sw_ratio` and computes the per-location ratio for `sw_ratio_location_variation`. If `lane_gap_in_sl / sw_ratio` is below `same_tier_sw` anywhere, the tiering key set needs recalibration before any M4 work (RP-5).
 

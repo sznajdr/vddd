@@ -128,6 +128,14 @@ entries:
     value: null
     evidence: null
     date: null
+  - key: track_width_sl
+    provisional: 5.8
+    instrument: "track plan or paced measurement of rail-to-fence width, divided by SL_world (OD-1x step 4 can also read it from a frame where both lines are visible)"
+    rule: "only needed if lateral_scale_mode becomes rail_fence (RP-19); then value := width_m / SL_m"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
   - key: axis_neighbourhood_k
     provisional: 0
     instrument: "sheet_geometry.csv bend frame: lateral spread of the pack along a straight axis vs a local axis (research 05, RP-20)"

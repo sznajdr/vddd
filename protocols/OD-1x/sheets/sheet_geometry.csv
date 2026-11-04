@@ -1,2 +1,2 @@
-race_id,location,video_timecode_s,sl_px,lane_gap_px,lane_gap_in_sl,cover_lat_px,cover_lat_in_sl,rail_screen_side,gap_ge_6sl_seen,n_visible,notes
+race_id,location,video_timecode_s,sl_px,lane_gap_px,lane_gap_in_sl,cover_lat_px,cover_lat_in_sl,rail_screen_side,gap_ge_6sl_seen,n_visible,view_angle_deg,fence_rail_px,both_lines_visible,camera_position,notes
 # location in {near_straight,far_straight,bend}; rail_screen_side in {bottom,top,left,right}

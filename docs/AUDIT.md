@@ -19,6 +19,12 @@ Each entry: what was checked, what was wrong, what changed. Dates are when the f
 | 2026-11-04 | **M4 §3.1 axis (RP-21)** | Per-frame motion axis from ~4 px displacements with 0.3 px jitter tilted up to 7° on some frames; since Δw ≈ (SL/SW)·l·sin δ this merged all lanes and made whole frames `UNKNOWN`. | Length-weighted axial mean, `axis_min_vector_sl` jitter guard, `axis_smooth_s` temporal smoothing that PCA frames never seed; §3.1 text amended (L-10b) with the ≈ 1° accuracy requirement; regression test with jittered boxes. |
 | 2026-11-04 | Headless replays | A scripted seeding replay produced wall-clock minutes of ~1e-6 that would have fed KG-1 / Q-7. | `SeedingSession.headless` marker; `pilot_run.py` ignores minutes from headless sessions unless `--human-minutes` is given for dry runs. |
 
+| 2026-11-04 | Simulator (A1) | First study placed the pack at arc length 0 (west end of the home straight, 250 m from a mid-stands camera) and read an end-on view as side-on; a constant-speed pan with constant lag left zero residual image motion. | Pack placed in front of the stands by default; pan wobble added; study positions expressed relative to the stands with a view-angle column. |
+| 2026-11-04 | M4 §3.1 axis (RP-22) | Motion axis 5–6° off with zero jitter under a tracking camera (pan + zoom flow). | `axis_source = rail`; rail direction never smoothed (smoothing lagged the rotating direction by ~6°). |
+| 2026-11-04 | M4 lateral scale (RP-19) | Linear two-line scale wrong under perspective. | 1-D projective lateral coordinate from rail, fence and vanishing point; polyline datum on bends. |
+| 2026-11-04 | M4 centroid (RP-23) | `(mid-x, max-y)` carries ≈ 1 SW pan-dependent lateral bias; absolute tiers failed at the closed `rail_attach_sw` boundary. | Foot-point correction in projective mode. |
+| 2026-11-04 | Study metric | Undetected (out-of-frame) runners counted as tier failures. | Detected runners only; visibility is EC-02's business. |
+
 ## Open items found by the audit (owner decisions)
 
 - RP-11 (D-26 table gap), see `spec/RECON-2.0.0-patches.md`.

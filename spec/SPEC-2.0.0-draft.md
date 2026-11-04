@@ -199,6 +199,8 @@ Per frame, over all valid detections:
 - Homography to metric track coordinates: **banned in v1** (out of scope §12; only reconsidered if GPS/sectional calibration data ever materializes).
 - Y-coordinate-as-depth heuristics: **banned** (superseded by pack-space projection).
 
+`[OPEN: RP-19/RP-22/RP-23 — owner decision]` The world-space simulator study (`docs/research/11-simulated-geometry.md`) shows that from an elevated side-on camera lateral metres project at roughly height/depth of longitudinal metres, so `SW = SL·sw_ratio` merges adjacent lanes by construction, that the §3.1 motion axis is biased by pan/zoom even without jitter, and that the `(mid-x, max-y)` centroid carries a pan-dependent lateral bias. Three options are implemented in the reference projector and proposed for adoption: (a) `axis_source = rail` — the projected rail-line direction as the primary axis, never smoothed; (b) `lateral_scale_mode = rail_fence_projective` — a 1-D projective lateral coordinate from the rail line, the fence line and their vanishing point (horizon assumed horizontal; needs `track_width_sl` `[EG]`), with each runner measured against the nearest rail/fence polyline segment on bends; (c) a foot-point correction (`vehicle_half_width_sw`) from the bbox bottom edge to the vehicle centre line. (b) is not a homography to track coordinates and would need an explicit carve-out in this section. Lateral resolvability remains bounded by the covering camera's elevation per track section (RP-24).
+
 ### 3.4 Temporal smoothing
 
 Raw per-frame states MUST be smoothed before segment emission:
@@ -414,6 +416,7 @@ Thresholds are a **versioned artifact** (`threshold_set_version`), never constan
 | `rail_ref_conf_min` | 0.5 | EC-13 (M4 rail-reference confidence; module default) |
 | `axis_neighbourhood_k` | 0 `[EG: OD-1x bend frame]` | §3.1 (0 = whole-pack axis; RP-20) |
 | `axis_min_vector_sl` / `axis_smooth_s` | 0.05 / 1.0 | §3.1 motion-axis jitter guard and temporal smoothing (RP-21) |
+| `lateral_scale_mode` / `track_width_sl` | sw_ratio / 5.8 `[EG: track plan]` | §3.2 lateral scale; `rail_fence` = two track lines at known separation (RP-19, `[OPEN]`) |
 | `rail_lane_center_offset_sw` | 0.5 | §2.2 |
 | `rail_attach_sw` | 1.0 | §2.2 / EC-13 |
 | `rank_tie_sl` | 0.10 | §2.2 / §2.3 |
