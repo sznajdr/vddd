@@ -5,7 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
-import lint_docs  # noqa: E402 -- import the repository tool after bootstrapping its directory
+import lint_docs  # the repository tool, imported after bootstrapping its directory (ruff's E402 exempts this)
 
 
 def test_repository_docs_are_clean():
