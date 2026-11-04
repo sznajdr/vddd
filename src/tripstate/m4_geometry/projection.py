@@ -20,8 +20,9 @@ Degenerate frames (pack < pack_min_visible, unstable axis, missing calibration) 
 """
 from __future__ import annotations
 
+import json
 import math
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from itertools import pairwise
 
 import numpy as np
@@ -358,6 +359,44 @@ class ShotProjector:
         self.history.append((t, cents))
         self.history = [h for h in self.history if t - h[0] <= 2 * self.window + 1.0]
         return frame
+
+
+def frames_to_json(frames: list[FrameGeometry], race_id: str, t0_video_s: float, tend_video_s: float,
+                   intervals: list[tuple[float, float]], saddles: list[int], producer: str = "ShotProjector",
+                   box_heights: dict[float, dict[int, float]] | None = None) -> str:
+    """The explicit per-race M4 frame record (every RunnerGeometry field per frame), the input of
+    tools/export_calibration_inputs.py (C8). Floats unquantized: operational, not canonical (D-32)."""
+    recs = []
+    for f in frames:
+        runners = [dict(asdict(r), box_h_px=(box_heights or {}).get(f.t, {}).get(r.saddle_no)) for r in f.runners]
+        recs.append({"t": f.t, "sl_px": f.sl_px, "sw_px": f.sw_px, "axis": list(f.axis) if f.axis is not None else None,
+                     "axis_method": f.axis_method, "conf": f.conf, "runners": runners})
+    doc = {"format": "tripstate.m4.frames/1", "race_id": race_id, "producer": producer, "t0_video_s": t0_video_s,
+           "tend_video_s": tend_video_s, "intervals": [list(iv) for iv in intervals], "saddles": list(saddles), "frames": recs}
+    return json.dumps(doc, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
+
+
+def frames_from_json(text: str) -> tuple[list[FrameGeometry], dict]:
+    """Inverse of frames_to_json: (frames, meta) where meta has race_id, producer, t0/tend, intervals, saddles,
+    box_heights {t: {saddle: h}}."""
+    doc = json.loads(text)
+    if doc.get("format") != "tripstate.m4.frames/1":
+        raise ValueError(f"not a tripstate.m4.frames/1 document: {doc.get('format')!r}")
+    frames, heights = [], {}
+    for rec in doc["frames"]:
+        runners = []
+        for r in rec["runners"]:
+            r = dict(r)
+            h = r.pop("box_h_px", None)
+            if h is not None:
+                heights.setdefault(rec["t"], {})[r["saddle_no"]] = h
+            runners.append(RunnerGeometry(**r))
+        frames.append(FrameGeometry(rec["t"], rec["sl_px"], rec["sw_px"], tuple(rec["axis"]) if rec["axis"] else None,
+                                    rec["axis_method"], rec["conf"], runners))
+    meta = {k: doc[k] for k in ("race_id", "producer", "t0_video_s", "tend_video_s", "saddles")}
+    meta["intervals"] = [tuple(iv) for iv in doc["intervals"]]
+    meta["box_heights"] = heights
+    return frames, meta
 
 
 def to_frame_geoms(frames: list[FrameGeometry], saddles: list[int]) -> tuple[dict[int, list], list[float]]:

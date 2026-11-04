@@ -10,3 +10,5 @@
 | DoD | Schema-additive migration = minor; breaking = major; default views join `chartable = true`. |
 
 Quantization (L-39): `_frac` 6 dp, `_s` 3 dp, `_sl`/`_sw`/`conf` 4 dp. Applied only in the export.
+
+`determinism.py` (C3, D-32): `fingerprint()` → the `versions.determinism_env` JSON (actual versions and flags, null when absent, key-sorted); `versions_row()` for `Store.insert`; CLI `tools/env_fingerprint.py`.

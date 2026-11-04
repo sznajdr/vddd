@@ -85,7 +85,9 @@ pilot reports ────────────────pilot_report.py─
                           DECISION-LOG.md       ──▶ Pending → Closed (SPEC-2.0.0 §1)
                           version.py            ──▶ SPEC_VERSION 2.0.0, FROZEN  (load_default() then returns the frozen set)
                                                         │
-   golden_manifest.py build (now allowed) → hand charts (OD-3) → pipeline runs → geometry sidecars (tripstate.calibration.sidecar)
+   golden_manifest.py build (now allowed) → hand charts (OD-3) → pipeline runs → data/frames/<race>.frames.json (M4 record)
+                      export_calibration_inputs.py: frames + store hand_charts + manifest → data/calibration/ (sidecars + charts;
+                          refuses S-6 mismatches and ambiguous human producers)
                                                         │
                       calibrate.py = tripstate.calibration: grid over config/calibration/search-space.yaml on DEV races,
                           candidate TS → re-derive tiers from stored geometry → chart_race → §6.2 headline; constraints from

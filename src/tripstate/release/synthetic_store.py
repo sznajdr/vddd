@@ -6,8 +6,10 @@ Builds N scripted races through M4→M5→M7 (the pipeline the synth-demo runs),
 canonical payload (DoD-5 is checked by building twice). NOT evidence for anything (§7)."""
 from __future__ import annotations
 
+from pathlib import Path
+
 from tripstate.config import ThresholdSet
-from tripstate.m4_geometry import ShotCalibration, ShotProjector, to_frame_geoms
+from tripstate.m4_geometry import ShotCalibration, ShotProjector, frames_to_json, to_frame_geoms
 from tripstate.m5_states import chart_race
 from tripstate.m7_qc import RaceQCInput, evaluate_gates, runner_qc_row
 from tripstate.m8_storage import Store, ordinal_ids
@@ -29,8 +31,11 @@ def _race_rows(i: int, rid: str, fmt: str, piste: str, n_runners: int) -> tuple[
 
 
 def build_synthetic_store(ts: ThresholdSet, n_heldout: int = 10, n_dev: int = 12, n_breaks: int = 12, recall_misses: int = 2,
-                          created_at: str = "2026-11-04T00:00:00", path: str = ":memory:") -> tuple[Store, dict]:
+                          created_at: str = "2026-11-04T00:00:00", path: str = ":memory:", frames_dir: Path | None = None) -> tuple[Store, dict]:
+    """frames_dir: when given, also writes <race_id>.frames.json (tripstate.m4.frames/1) per race — the C8 exporter input."""
     st = Store(path)
+    if frames_dir is not None:
+        Path(frames_dir).mkdir(parents=True, exist_ok=True)
     entries = []
     break_budget, miss_budget = n_breaks, recall_misses
     st.insert("versions", [{"producer_version": PRODUCER_CV, "producer_kind": "cv_extract", "extractor_version": EXTRACTOR},
@@ -42,9 +47,15 @@ def build_synthetic_store(ts: ThresholdSet, n_heldout: int = 10, n_dev: int = 12
         race = scripted_race(duration_s=6.0 + (i % 3))
         saddles = [r.saddle_no for r in race.runners]
         proj = ShotProjector(ts, ShotCalibration(+1, "right_of_travel", True), race.fps)
-        frames = [proj.project(t, boxes, rail, 0.9, saddles) for t, boxes, rail in render_boxes(race)]
+        rendered = render_boxes(race)
+        frames = [proj.project(t, boxes, rail, 0.9, saddles) for t, boxes, rail in rendered]
         geoms, times = to_frame_geoms(frames, saddles)
         iv = [(race.t0, race.tend)]
+        if frames_dir is not None:
+            heights = {t: {b.saddle_no: b.y2 - b.y1 for b in boxes} for t, boxes, _ in rendered}
+            (Path(frames_dir) / f"{rid}.frames.json").write_text(
+                frames_to_json(frames, rid, race.t0, race.tend, iv, saddles, producer=f"{EXTRACTOR}/{ts.version}", box_heights=heights),
+                encoding="utf-8")
         pred = chart_race(geoms, times, iv, race.t0, race.tend, ts)
         tg, tt = truth_frames(race)
         truth = chart_race(tg, tt, iv, race.t0, race.tend, ts)

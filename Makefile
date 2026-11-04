@@ -1,4 +1,4 @@
-.PHONY: setup test lint lint-spec freeze-check freeze-dry-run od1x-timer synth-demo pilot-demo calibrate-dry-run evaluate-dry-run
+.PHONY: setup test lint lint-spec freeze-check freeze-dry-run od1x-timer od1x-rehearsal synth-demo pilot-demo calibrate-dry-run evaluate-dry-run
 
 setup:
 	pip install -e ".[dev]"
@@ -27,6 +27,11 @@ freeze-dry-run:
 
 od1x-timer:
 	python tools/od1x_timer.py --help
+
+# C6: the owner's OD-1x afternoon rehearsed with synthetic inputs (clip, sheet templates, scripted stopwatch,
+# instantiation proposals on the committed fixture). Nothing it writes is evidence.
+od1x-rehearsal:
+	python tools/od1x_rehearsal.py --out /tmp/tripstate-od1x-rehearsal
 
 synth-demo:
 	tripstate synth-demo

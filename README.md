@@ -23,7 +23,7 @@ pipeline against it once frozen.
 | `spec/registers/kill_gates.yaml` | Project abort criteria (§0.4). | Yes |
 | `config/thresholds/` | Versioned threshold sets (`TS-x.y.z.yaml`). Never constants in code (D-18). The `release` / `calibration` namespaces hold the DoD floors and §7.2 constraints. | Yes |
 | `config/calibration/search-space.yaml` | Which threshold keys §7.2 calibration may move, over which grid. | Yes |
-| `protocols/` | Step-by-step human protocols: OD-1x, 5-race pilot, signal gate, hand-charting. | Operational |
+| `protocols/` | Step-by-step human protocols: OD-1x, 5-race pilot, signal gate, hand-charting; `OPERATOR/` = keymap card, seeding walkthrough, anchor prompts. | Operational |
 | `src/tripstate/` | Python package. M0 (ingest + video), M1 scaffold, M3 checks + seeding, M4 (tiering, cover, projection), M5 (states, smoothing, segments), M6 uncalibrated reference, M7 (gates, yield, shot gaps, runner QC), M8 (canonical export, SQLite store), evaluation, golden manifest, BORIS charting, text parse, signal gate, synthetic races, pilot stack; `release/` (freeze check, marker binding, promotion, DoD evaluation) and `calibration/` (§7.2 harness). | Code |
 | `tests/` | Unit tests for the implemented logic and the freeze check. | Code |
 | `tools/` | CLI helpers for the human protocols, spec hygiene, and the freeze → calibration → release path (`promote_draft.py`, `calibrate.py`, `evaluate_release.py`; each has a synthetic dry run). | Code |
@@ -60,4 +60,5 @@ make lint-spec      # table/ID hygiene on the spec files + draft reproducibility
 make freeze-dry-run # rehearse the D-36 promotion on synthetic OD-1x sheets (temp dir, repo untouched)
 make calibrate-dry-run  # §7.2 harness recovers a mis-set threshold on synthetic races
 make evaluate-dry-run   # DoD-1…6 report on a synthetic M8 store
+make od1x-rehearsal     # the owner's OD-1x afternoon rehearsed with synthetic inputs (temp dir)
 ```

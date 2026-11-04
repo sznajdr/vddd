@@ -16,7 +16,7 @@ _Last updated: 2026-11-04 (delegated decisions resolved; code and continuation h
 
 ## Continue now
 
-The owner delegated the design queue. Decisions are settled in `docs/decisions/2026-11-04-continuation.md` and applied through ledger L-46…L-50. Claude can proceed with C6, C8, C3, C7, RP-18 schema work and D2; the exact acceptance criteria are in `docs/HANDOFF-NEXT-SESSION.md`. D1 is complete. No further design sign-off is required for that block.
+The owner delegated the design queue. Decisions are settled in `docs/decisions/2026-11-04-continuation.md` and applied through ledger L-46…L-50. D1 is complete. Of the continuation queue, **C6, C8, C3 and C7 are done** (`make od1x-rehearsal`, `tools/export_calibration_inputs.py`, `tools/env_fingerprint.py`, `protocols/OPERATOR/`); RP-18 schema work and D2 follow; the exact acceptance criteria are in `docs/HANDOFF-NEXT-SESSION.md`. No further design sign-off is required for that block.
 
 ## Remaining external inputs
 
@@ -61,6 +61,10 @@ All 20 remaining draft markers bind to the registry or kill-gates. No unresolved
 - [x] **A5** `tools/promote_draft.py` + `tripstate.release` (freeze check with `[EG]` marker binding, OD-1x/pilot instantiation, promotion: FROZEN header + freeze record, D-26…D-36 into §1, markers → frozen values, changelog row, `TS-2.0.0-frozen.yaml`, decision log Pending → Closed, `version.py` bump; dry run with diffs; real run rehearsed on an isolated repo copy, idempotent). Registry entries added for `normalized_fps` and `sw_ratio`; `instantiate_eg.py` fills them and the D-29 pilot keys (`--pilot-reports`)
 - [x] **A4** `tripstate.calibration` + `tools/calibrate.py` (geometry sidecars with pack-space re-derivation, grid search on dev charts with the §6.2 headline and config constraints, provenance-carrying TS writer, one-shot held-out with the > 10 pt rule; `--synthetic` recovers mis-set `cover_lat_sw` / `same_tier_sw` exactly; real run refused while DRAFT). DoD floors and §7.2 constraints now live in TS namespaces `release` / `calibration` (D-18)
 - [x] **B6** `tools/evaluate_release.py` + `tripstate.release.evaluate` (DoD-1…6 with pass/fail/invalid reasons, Wilson CI, dual headline with/without Q-7, per-stratum yield and headline, `data/releases/<version>/evaluation.md` + changelog row; `--synthetic` store, two runs for DoD-5)
+- [x] **C6** `make od1x-rehearsal` (`tools/od1x_rehearsal.py`): synthetic clip, clean sheet templates, scripted stopwatch row marked REHEARSAL (`od1x_timer.py --script`, refuses non-`SYNTH-` race ids), instantiation proposals checked against `tests/fixtures/od1x_synthetic/expected_proposals.json`
+- [x] **C8** `tools/export_calibration_inputs.py`: M4 frame JSON (`tripstate.m4.frames/1`, `frames_to_json`/`frames_from_json`) + store + manifest → `data/calibration/<race_id>.geometry.json` + `.hand_chart.json`; refuses missing inputs, S-6 split mismatches, ambiguous human producers (all or nothing); synthetic round trip into `tools/calibrate.py`
+- [x] **C3** `tools/env_fingerprint.py` + `tripstate.m8_storage.determinism`: `versions.determinism_env` with actual versions (python/numpy/opencv/ffmpeg, torch/CUDA/cuDNN/GPU and the D-32 flags when torch is importable), seed / half-precision / batch size / weight SHA-256 as given; null for anything absent; stable output; `versions` row insert
+- [x] **C7** `protocols/OPERATOR/`: keymap card (tested against `SeedingSession.KEYMAP`), ten-minute walkthrough on the synthetic clip, EC-04 anchor prompts per start type (tested against `start_prompt()`)
 - [x] Throwaway pilot stack (`tripstate.pilot`): ffmpeg frame source, synthetic video renderer, oracle + blob detectors, IoU tracker, seed→track assignment with flags, oracle + SAM 2 propagators, IDF1/IDSW/MOTA-lite, race runner → report, kill-gate aggregation; `tools/synth_video.py`, `pilot_run.py`, `pilot_report.py`; `make pilot-demo` runs the loop on synthetic video
 
 ## Research pack (2026-11-04)

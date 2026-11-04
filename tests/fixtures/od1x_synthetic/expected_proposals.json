@@ -1,0 +1,21 @@
+{
+ "anchor_offset_autostart_s": 0.3,
+ "anchor_offset_volte_s": 1.2,
+ "anchor_tol_autostart_s": 0.5,
+ "anchor_tol_volte_s": 0.5,
+ "axis_neighbourhood_k": 0,
+ "cover_lat_sw": 0.9,
+ "coverage_final_third_min": 0.7,
+ "coverage_race_min": 0.65,
+ "detach_sl_prevalence": 2,
+ "dod3_median_target_min": 5,
+ "finish_evidence_min_k": 3,
+ "human_budget_cap_min": 8,
+ "max_tier_span_sw": 1.2,
+ "normalized_fps": 25.0,
+ "same_tier_sw": 0.6,
+ "seeding_feasible": 4.25,
+ "sw_ratio": 0.35,
+ "sw_ratio_location_variation": 1.58,
+ "track_width_sl": 5.85
+}
