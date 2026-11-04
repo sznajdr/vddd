@@ -43,8 +43,8 @@ Status 2026-11-04. Everything below is doable in this repository without replays
 
 | # | Item | Why / unlocks | Needs | Effort |
 |---|---|---|---|---|
-| D1 ✅ | **Delegated design decisions resolved.** See `docs/decisions/2026-11-04-continuation.md`; applied ledger L-46…L-50. RP-18 additive seed provenance is approved as the next schema task. | Implementation can proceed without another sign-off. | done | S |
-| D2 | **Spec invariant tests.** Property-based tests (hypothesis) on `chart_race`: exactly one base segment per instant, overlays inside visibility, half-open intervals, at most one lead per frame, determinism of `ordinal_ids`/canonical export under row shuffling. | Catches regressions in the normative rules independent of fixtures. | — | S |
+| D1 ✅ | **Delegated design decisions resolved.** See `docs/decisions/2026-11-04-continuation.md`; applied ledger L-46…L-50. RP-18 additive seed provenance delivered 2026-11-04 (L-51: DDL, `tripstate.m3_track.assignments`, `Store.migrate_additive`, tests). | Implementation can proceed without another sign-off. | done | S |
+| D2 ✅ | **Spec invariant tests** — done 2026-11-04 (`tests/test_invariants_property.py`, hypothesis in the dev extras; found and fixed `covered = false` on `UNKNOWN` rows in M5). Original scope: Property-based tests (hypothesis) on `chart_race`: exactly one base segment per instant, overlays inside visibility, half-open intervals, at most one lead per frame, determinism of `ordinal_ids`/canonical export under row shuffling. | Catches regressions in the normative rules independent of fixtures. | — | S |
 | D3 | **Type checking and docs build.** mypy/pyright config, `make check`, API docs from docstrings. | Hygiene for agent hand-offs. | — | S |
 | D4 | **Release alignment.** `tripstate.__version__` tied to the spec version; `tools/release.py` tagging store `schema_version`. | D-13 discipline at the package level. | — | S |
 

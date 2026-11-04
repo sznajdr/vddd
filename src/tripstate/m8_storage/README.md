@@ -12,3 +12,5 @@
 Quantization (L-39): `_frac` 6 dp, `_s` 3 dp, `_sl`/`_sw`/`conf` 4 dp. Applied only in the export.
 
 `determinism.py` (C3, D-32): `fingerprint()` → the `versions.determinism_env` JSON (actual versions and flags, null when absent, key-sorted); `versions_row()` for `Store.insert`; CLI `tools/env_fingerprint.py`.
+
+**Schema-additive migration (M8 DoD):** `Store.apply_schema()` runs the DDL (`CREATE TABLE IF NOT EXISTS`) and then `migrate_additive()`, which adds every nullable column the DDL has and an existing store lacks (`ALTER TABLE … ADD COLUMN`, idempotent, returns the pairs added) and refuses NOT NULL / key columns as breaking changes (major version). First use: the RP-18 columns on `id_assignments` (L-51).

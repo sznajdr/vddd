@@ -33,6 +33,11 @@ Each entry: what was checked, what was wrong, what changed. Dates are when the f
 | 2026-11-04 | Handoff text | "Changelog row template already in the draft's changelog" — the template is in the ledger (`SPEC-2.0.0-draft-LEDGER.md` row `2.0.0 | _at freeze_`), not in the draft. | `promote.changelog_row` follows the ledger template; no draft edit needed. |
 | 2026-11-04 | pilot/report.py × D-18 | `evaluate_kill_gates` hard-codes the gate thresholds (8, 0.85, 0.40, 2.0) that `kill_gates.yaml` carries. | Not changed in this block (tests pin the function signature); listed below as hygiene. |
 
+| 2026-11-04 | C8 × §7.2 load constraint | With box heights in the sidecars the uncalibrated M6 reference detector runs during calibration and reports a candidate-load median of 5 on the scripted synthetic race (cap 4), so no grid candidate is feasible there. | Correct behaviour (the harness reports it rather than hiding it); the round-trip test relaxes only that cap to show the geometry recovery, and the scripted race is documented as non-discriminating for `cover_lat_sw` (lanes exactly 1 SW apart). A §7.2 run on real races must tune M6 inside the same search or report the load as infeasible. |
+| 2026-11-04 | C8 exporter semantics | `--human-producer` must exist for every selected race; a race without that producer refuses the whole export (all or nothing). | Kept strict; select races explicitly with `--races` when charters differ per race. |
+| 2026-11-04 | M5 × §9 payload (D2) | `classify_frame` recorded `covered` as a boolean on `UNKNOWN` rows (order-ambiguous / table-gap reasons); §9 requires NULL on `NOT_VISIBLE`/`UNKNOWN`. Found by the hypothesis shape-invariant test on its first run. | `UNKNOWN` rows now carry `covered = None`; the property test pins the rule. |
+| 2026-11-04 | RP-18 × canonical export | Pixel click columns have no quantization class in L-39 (fractions 6 dp, seconds 3 dp, SL/SW/conf 4 dp); they take the default 6 dp. | Left as the default (deterministic, harmless for clicks); noted here rather than adding a new class. |
+
 ## Disposition after delegated decisions (2026-11-04)
 
 Earlier table rows are historical findings. The owner delegated the remaining verdicts; `docs/decisions/2026-11-04-continuation.md` supersedes their pending wording.

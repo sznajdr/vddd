@@ -155,9 +155,9 @@ def classify_frame(
         low = min_conf <= r.conf < ok_conf
         st, reason = base[s]
         if s in ambiguous:
-            out[s] = RunnerState(s, "UNKNOWN", c, None, None, None, low, "order_ambiguous")
+            out[s] = RunnerState(s, "UNKNOWN", None, None, None, None, low, "order_ambiguous")   # §9: covered is NULL on UNKNOWN
         elif st == "UNKNOWN":
-            out[s] = RunnerState(s, "UNKNOWN", c, None, None, None, low, reason)
+            out[s] = RunnerState(s, "UNKNOWN", None, None, None, None, low, reason)
         elif st == "PARKED":
             out[s] = RunnerState(s, "PARKED", False, None, None, None, low)
             parked.append(r)

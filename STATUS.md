@@ -16,7 +16,7 @@ _Last updated: 2026-11-04 (delegated decisions resolved; code and continuation h
 
 ## Continue now
 
-The owner delegated the design queue. Decisions are settled in `docs/decisions/2026-11-04-continuation.md` and applied through ledger L-46…L-50. D1 is complete. Of the continuation queue, **C6, C8, C3 and C7 are done** (`make od1x-rehearsal`, `tools/export_calibration_inputs.py`, `tools/env_fingerprint.py`, `protocols/OPERATOR/`); RP-18 schema work and D2 follow; the exact acceptance criteria are in `docs/HANDOFF-NEXT-SESSION.md`. No further design sign-off is required for that block.
+The owner delegated the design queue. Decisions are settled in `docs/decisions/2026-11-04-continuation.md` and applied through ledger L-46…L-50. D1 is complete. **The whole continuation queue is done**: C6, C8, C3, C7 (`make od1x-rehearsal`, `tools/export_calibration_inputs.py`, `tools/env_fingerprint.py`, `protocols/OPERATOR/`), the RP-18 schema task (L-51: `seed_x_px`, `seed_y_px`, `seed_box_ref` with writers, additive migration and tests) and D2 (property-based invariant tests, which found and fixed a §9 payload defect in M5). Remaining backlog: B4/B5 adapters, C1/C2/C4/C5/C9, D3/D4.
 
 ## Remaining external inputs
 
@@ -65,6 +65,8 @@ All 20 remaining draft markers bind to the registry or kill-gates. No unresolved
 - [x] **C8** `tools/export_calibration_inputs.py`: M4 frame JSON (`tripstate.m4.frames/1`, `frames_to_json`/`frames_from_json`) + store + manifest → `data/calibration/<race_id>.geometry.json` + `.hand_chart.json`; refuses missing inputs, S-6 split mismatches, ambiguous human producers (all or nothing); synthetic round trip into `tools/calibrate.py`
 - [x] **C3** `tools/env_fingerprint.py` + `tripstate.m8_storage.determinism`: `versions.determinism_env` with actual versions (python/numpy/opencv/ffmpeg, torch/CUDA/cuDNN/GPU and the D-32 flags when torch is importable), seed / half-precision / batch size / weight SHA-256 as given; null for anything absent; stable output; `versions` row insert
 - [x] **C7** `protocols/OPERATOR/`: keymap card (tested against `SeedingSession.KEYMAP`), ten-minute walkthrough on the synthetic clip, EC-04 anchor prompts per start type (tested against `start_prompt()`)
+- [x] **RP-18 / L-51** `id_assignments.seed_x_px/seed_y_px/seed_box_ref`: DDL, `tripstate.m3_track.assignments` writers (session and pilot paths, wired into `PilotRaceReport.id_assignments`), `Store.migrate_additive()` for existing stores (refuses breaking columns), canonical export + producer coexistence tests; §9 row updated by ledger L-51
+- [x] **D2** `tests/test_invariants_property.py` (hypothesis): base-segment partition of charted time, overlays inside visible base time, half-open adjacency, at most one `lead_uncovered_outside` per instant, §9 payload NULLs on abstention states, canonical export invariant under row shuffling, marker binding invariant under non-marker edits. Found M5 emitting `covered = false` on `UNKNOWN` rows (fixed)
 - [x] Throwaway pilot stack (`tripstate.pilot`): ffmpeg frame source, synthetic video renderer, oracle + blob detectors, IoU tracker, seed→track assignment with flags, oracle + SAM 2 propagators, IDF1/IDSW/MOTA-lite, race runner → report, kill-gate aggregation; `tools/synth_video.py`, `pilot_run.py`, `pilot_report.py`; `make pilot-demo` runs the loop on synthetic video
 
 ## Research pack (2026-11-04)

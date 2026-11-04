@@ -40,6 +40,29 @@ class Store:
     def apply_schema(self) -> None:
         self.conn.executescript(DDL_PATH.read_text(encoding="utf-8"))
         self.conn.commit()
+        self.migrate_additive()
+
+    def migrate_additive(self) -> list[tuple[str, str]]:
+        """Schema-additive migration (M8 DoD; §14: new columns = minor version): add to an existing store every
+        column the DDL has and the table lacks, as `ALTER TABLE … ADD COLUMN` with the DDL's type. Only nullable
+        columns without a NOT NULL constraint can be added this way; anything else is a breaking change and raises.
+        Returns the (table, column) pairs added; idempotent."""
+        ref = sqlite3.connect(":memory:")
+        ref.executescript(DDL_PATH.read_text(encoding="utf-8"))
+        added: list[tuple[str, str]] = []
+        for (table,) in ref.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"):
+            have = {r[1] for r in self.conn.execute(f"PRAGMA table_info({table})")}
+            for _cid, name, ctype, notnull, default, pk in ref.execute(f"PRAGMA table_info({table})"):
+                if name in have:
+                    continue
+                if pk or (notnull and default is None):
+                    raise RuntimeError(f"{table}.{name}: NOT NULL / key column cannot be added additively (breaking change = major version)")
+                self.conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {ctype}" + (f" DEFAULT {default}" if default is not None else ""))
+                added.append((table, name))
+        ref.close()
+        if added:
+            self.conn.commit()
+        return added
 
     # --- schema introspection -------------------------------------------------------------
     def columns(self, table: str) -> list[str]:
