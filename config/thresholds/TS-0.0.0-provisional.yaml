@@ -26,6 +26,8 @@ geometry:
   axis_pca_conf: {value: 0.6, used_in: "§3.1 confidence assigned to PCA-fallback frames"}
   axis_trim_deg: {value: 45, used_in: "§3.1 outlier trim for motion vectors"}
   pack_min_visible: {value: 3, used_in: "§3 / EC-02 fewer visible runners -> conf 0"}
+  axis_min_vector_sl: {value: 0.05, used_in: "§3.1 displacements shorter than this fraction of SL are ignored for the motion axis (jitter guard)"}
+  axis_smooth_s: {value: 1.0, used_in: "§3.1 time constant of the axis smoothing; RP-21 axis-accuracy requirement"}
   axis_neighbourhood_k: {value: 0, eg: true, used_in: "§3.1 principal axis fitted on k nearest runners (0 = whole pack); research 05 bends proposal"}
 
 smoothing:

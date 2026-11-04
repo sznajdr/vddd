@@ -49,6 +49,7 @@ not written as fact.
 make setup          # install package + test deps
 make test           # run unit tests
 make synth-demo     # run a scripted synthetic race through M4→M5→M7→M8 and score it
+make pilot-demo     # synthetic video → headless seeding → both pilot identity paths → kill-gate report
 make freeze-check   # fails while any EG marker is un-instantiated (expected now)
 make lint-spec      # table/ID hygiene on the spec files + draft reproducibility
 ```

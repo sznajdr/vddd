@@ -10,6 +10,10 @@ Does the field offer anything better than pack-relative coordinates for a pannin
 - **Camera motion compensation in trackers:** BoT-SORT registers consecutive frames (sparse features / ECC) and corrects the Kalman prediction; it is the mechanism meant for pans; it degrades on low-texture backgrounds. ([BoT-SORT](https://arxiv.org/pdf/2206.14651), [Roboflow docs](https://trackers.roboflow.com/latest/trackers/botsort/))
 - **Peloton analogues:** cycling drafting detection has been done from a bike-mounted camera with geometric distance estimation and LiDAR ground truth (Sensors 2020), not from broadcast; CyclingTrack (2026) is an aerial MOT benchmark; broadcast rider identification reads race numbers from side views. The pack-relative idea has no published broadcast precedent, which is consistent with D-07 being a deliberate simplification rather than a known technique. ([Allebosch et al. 2020](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7085662/), [Velo/IDLab article](https://velo.outsideonline.com/road/road-racing/could-ai-be-the-future-of-bike-race-coverage/?scope=anon))
 
+## Finding from the synthetic pilot (2026-11-04)
+
+With 0.3 px box jitter and ~4 px displacements per 0.4 s window, the per-frame motion axis tilted by up to 7° on individual frames. Because `Δw ≈ (SL/SW)·l·sin δ`, a 7° tilt displaces a runner 5 SL back by ≈ 1.7 SL-equivalents = ~5 SW: every lane merges and the frame's tiers go `UNKNOWN`. The requirement implied by `same_tier_sw = 0.6` on a 5 SL pack is about **1° axis accuracy**. Fixes applied: length-weighted axial mean, minimum displacement `axis_min_vector_sl`, temporal smoothing `axis_smooth_s` (RP-21). This is independent of RP-5 and compounds it.
+
 ## Implications for the spec
 
 1. **The homography ban (§3.3) is justified by the literature**, not only by caution: every working calibration method assumes a marked template. Re-entry remains conditional on a calibration source (§12).

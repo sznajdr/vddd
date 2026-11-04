@@ -34,6 +34,8 @@ replay + metadata
  evaluation ─────────── §6.2 metrics + §6.4 audit sampler IMPLEMENTED (tripstate.evaluation)
  synth ──────────────── scripted races → pixel boxes; end-to-end test M4→M5→M7→M8 passes
  golden / charting ──── manifest tool (§6.1) and BORIS converter (RP-17) IMPLEMENTED
+ pilot / seeding ────── throwaway stack: ffmpeg frames, oracle/blob detectors, IoU tracker, seed assignment,
+                        oracle/SAM2 propagation, IDF1/IDSW, race runner, kill-gate report; seeding-session core + CLI
 ```
 
 Run the chain yourself: `tripstate synth-demo` (per-runner mask IoUs and edit scores against the scripted truth, gates, canonical SHA).

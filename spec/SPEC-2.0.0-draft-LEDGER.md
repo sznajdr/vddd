@@ -42,6 +42,7 @@ Legend: **now** = evidence-independent, lands verbatim. **EG** = structure lands
 | L-14 | §2.4 DETACHED | Add cross-reference to D-28 (diagnostic-only in metrics). Detached **groups** → §12 register, v1.5. | F-3, D-28 | now / reg |
 | L-15 | §2.5 BREAK | `positions_lost` valid only when the visible-runner set is identical at both samples, else NULL; add `positions_lost_basis_n`. | F-7, D-31 | now |
 | L-16 | §2.5 BREAK | DR-10: a break open at `t_frac = 1.0` → `t_end_frac = NULL`, `recovered = NULL`; expected to coincide with DAI; agents MUST NOT "fix" it. | DR-10 | now |
+| L-10b | §3.1 | Axis estimation hardened: length-weighted axial mean over displacements ≥ `axis_min_vector_sl`·SL, temporal smoothing `axis_smooth_s`; sensitivity statement `Δw ≈ (SL/SW)·l·sin δ` (≈ 1° accuracy needed on a 5 SL pack). Found by the synthetic pilot (RP-21). | RP-21 | now |
 | L-17 | §2.6 | Normative sentence: `t_frac` is race-clock fraction, not per-runner course fraction; downstream conditions on `base_distance_m` / `distance_run_m` / `piste`. Landmark detection stays banned; approximate track position is reconstructible downstream from `piste` + distance + RK. | S-2, DR-07 | now |
 
 ### §4 Modules

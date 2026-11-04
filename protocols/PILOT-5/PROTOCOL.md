@@ -29,6 +29,17 @@
 5. **Candidate load**: run `tripstate.m6_events.break_candidates` (uncalibrated) and count candidates per race against the hand-noted breaks. Informative only.
 6. **Tracker quality**: HOTA/IDF1 of the pre-correction tracks against the operator-corrected result, for both the seeded-propagation path and the detector+BoT-SORT path (research 07, RP-12); frames/s with 14 objects (R-15).
 
+## Dry run on synthetic video (works today, no replay needed)
+
+```bash
+python tools/synth_video.py --out data/synth
+python tools/seed_cli.py data/synth/synth.mp4 --race SYNTH-1 --out data/synth/session --script data/synth/seed_script.json
+python tools/pilot_run.py --video data/synth/synth.mp4 --race SYNTH-1 --race-json data/synth/race.json --session data/synth/session/session.json --truth data/synth/synth.mp4.truth.json --tier-labels data/synth/tier_labels.csv --path seeded --propagator oracle --out data/pilot5/SYNTH-1
+python tools/pilot_run.py --video data/synth/synth.mp4 --race SYNTH-1 --race-json data/synth/race.json --session data/synth/session/session.json --truth data/synth/synth.mp4.truth.json --tier-labels data/synth/tier_labels.csv --path detector --detector oracle --out data/pilot5/SYNTH-1
+python tools/pilot_report.py --reports 'data/pilot5/SYNTH-1/report_*.json' --md data/pilot5/pilot_report.md
+```
+`make pilot-demo` runs the five commands into a scratch directory. On real replays replace `--propagator oracle` with `--propagator sam2 --sam2-ckpt …` and `--detector oracle` with `gdino`, `owlv2` or `yolo`; drop `--truth` (metrics then need the operator-corrected result exported as truth).
+
 ## Output
 
 `data/pilot5/pilot_report.md` with the five numbers, the per-stratum yield table, and a filled `spec/registers/kill_gates.yaml`. Then `make freeze-check`.

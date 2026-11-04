@@ -1,5 +1,7 @@
 # Throwaway pilot stack build prompt (RP-2)
 
+> Status 2026-11-04: steps 1–5 exist as a tested skeleton in `src/tripstate/pilot/` and `src/tripstate/seeding/` with synthetic backends; the remaining work is running the real adapters (Grounding DINO / OWLv2 / YOLO, SAM 2) on footage and wiring live flags into the seeding window.
+
 Spec: SPEC-2.0.0-draft; protocol: protocols/PILOT-5/PROTOCOL.md. This stack is exempt from G-1…G-3 and
 its outputs are `producer_kind = pilot_throwaway`. Do not generalize it; it will be deleted.
 

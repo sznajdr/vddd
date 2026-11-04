@@ -184,7 +184,7 @@ Per frame, over all valid detections:
 1. Collect centroids `c_i` (bbox center-bottom: mid-x, max-y of `horse_sulky` box — the point nearest the track plane).
 2. Compute per-track motion vectors `v_i` over a `motion_window_s` (default 0.4 s) sliding window.
 3. Unsigned principal axis = robust mean axis of `{v_i}` (outlier-trimmed, e.g. geometric median of unit vectors); fallback when motion degenerates (pack nearly stationary in frame due to camera tracking): PCA first component of `{c_i}`. Canonicalize the unsigned vector to point toward positive screen-x (or positive screen-y when x = 0).
-4. Orient the axis as `u_long` using persisted `travel_direction_sign ∈ {-1, +1}` relative to that canonical vector. Majority image motion supplies only a heuristic proposal because camera pan can reverse apparent drift; a low-confidence or changed proposal MUST be human-confirmed in the seeding tool. Missing orientation calibration makes M4 confidence zero for that shot.
+4. Orient the axis as `u_long` using persisted `travel_direction_sign ∈ {-1, +1}` relative to that canonical vector. The unsigned axis MUST be temporally smoothed across frames (`axis_smooth_s`) and estimated from displacements longer than `axis_min_vector_sl`·SL with length weighting: lateral coordinates are extremely sensitive to axis error — a tilt δ displaces a runner `l` SL back by ≈ `(SL/SW)·l·sin δ` SW, so with `sw_ratio = 0.35` a 5 SL pack needs ≈ 1° axis accuracy for `same_tier_sw = 0.6` to separate lanes (RP-21). A single frame's motion estimate MUST NOT set the axis on its own. Majority image motion supplies only a heuristic proposal because camera pan can reverse apparent drift; a low-confidence or changed proposal MUST be human-confirmed in the seeding tool. Missing orientation calibration makes M4 confidence zero for that shot.
 5. `u_lat` = perpendicular to `u_long`, sign chosen so that **increasing lateral coordinate = away from the rail**. `rail_side ∈ {left_of_travel, right_of_travel}` is calibrated per charted shot (heuristic: the lower on-screen tier-1 line in the Vincennes wide pan) under the same confirm-on-low-confidence/change rule.
 
 ### 3.2 Projection and units
@@ -413,6 +413,7 @@ Thresholds are a **versioned artifact** (`threshold_set_version`), never constan
 | `max_tier_span_sw` | 1.2 `[EG: OD-1x]` | §2.2 (D-26) |
 | `rail_ref_conf_min` | 0.5 | EC-13 (M4 rail-reference confidence; module default) |
 | `axis_neighbourhood_k` | 0 `[EG: OD-1x bend frame]` | §3.1 (0 = whole-pack axis; RP-20) |
+| `axis_min_vector_sl` / `axis_smooth_s` | 0.05 / 1.0 | §3.1 motion-axis jitter guard and temporal smoothing (RP-21) |
 | `rail_lane_center_offset_sw` | 0.5 | §2.2 |
 | `rail_attach_sw` | 1.0 | §2.2 / EC-13 |
 | `rank_tie_sl` | 0.10 | §2.2 / §2.3 |

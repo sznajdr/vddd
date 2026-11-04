@@ -4,7 +4,7 @@ _Last updated: 2026-11-04 (agent scaffold, research pack, P1 draft cut)._ Update
 
 ## Phase
 
-**P1 complete: `spec/SPEC-2.0.0-draft.md` is the full prose draft** (cut from 1.2.0 by `tools/cut_draft.py`, 63 edits; the ledger stays as `SPEC-2.0.0-draft-LEDGER.md`). **Next: P2 (OD-1x) and P3 (signal gate)**, both owner-side; P4's throwaway pilot stack can be built by an agent whenever replays exist.
+**P1 complete: `spec/SPEC-2.0.0-draft.md` is the full prose draft** (cut from 1.2.0 by `tools/cut_draft.py`, 63 edits; the ledger stays as `SPEC-2.0.0-draft-LEDGER.md`). **Next: P2 (OD-1x) and P3 (signal gate)**, both owner-side. P4's throwaway pilot stack exists and runs end to end on synthetic video; on real replays it needs the model adapters (Grounding DINO / OWLv2 / YOLO, SAM 2) run once and the seeding window exercised with a display.
 
 ## Facts established
 
@@ -49,6 +49,8 @@ _Last updated: 2026-11-04 (agent scaffold, research pack, P1 draft cut)._ Update
 - [x] M8 SQLite store (DDL, chartable-only reads, structural D-11 guard, canonical SHA per table, version coexistence)
 - [x] M6 uncalibrated reference detector; golden manifest tool (§6.1, S-6); BORIS→hand_charts converter (RP-17)
 - [x] CI workflow, `tripstate` CLI (`ingest-video`, `synth-demo`, `evaluate`), audit fixes (`docs/AUDIT.md`)
+- [x] Seeding tool: `SeedingSession` state machine (keymap, auto-slowdown at flags, anchors, orientation, break review, first-past, recall, human-minutes) + `tools/seed_cli.py` (OpenCV window / headless script)
+- [x] Throwaway pilot stack (`tripstate.pilot`): ffmpeg frame source, synthetic video renderer, oracle + blob detectors, IoU tracker, seed→track assignment with flags, oracle + SAM 2 propagators, IDF1/IDSW/MOTA-lite, race runner → report, kill-gate aggregation; `tools/synth_video.py`, `pilot_run.py`, `pilot_report.py`; `make pilot-demo` runs the loop on synthetic video
 
 ## Research pack (2026-11-04)
 
@@ -62,3 +64,4 @@ _Last updated: 2026-11-04 (agent scaffold, research pack, P1 draft cut)._ Update
 - RP-12 seeded SAM 2 propagation as the M3 default (biggest design consequence of the research).
 - RP-14 / RP-15 / RP-17 stack and metric additions (low risk, recommended).
 - RP-19 / RP-20 geometry aids (only if OD-1x step 4 shows the lateral problem).
+- RP-21 axis-accuracy requirement (≈ 1° on a 5 SL pack): already applied as §3.1 text L-10b and code; confirm.

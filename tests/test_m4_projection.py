@@ -54,3 +54,23 @@ def test_no_rail_reference_means_unresolved_tiers(ts):
     for t, boxes, _ in render_boxes(race):
         f = proj.project(t, boxes, None, None, saddles)
     assert all(r.tier is None and r.tier_cluster is not None for r in f.runners)   # EC-13: never promote
+
+
+def test_axis_robust_to_box_jitter(ts):
+    """RP-21: sub-pixel jitter on short displacements must not tilt the axis enough to break tiering."""
+    import numpy as np
+
+    from tripstate.m4_geometry import Box
+    race = scripted_race(duration_s=6.0)
+    saddles = [r.saddle_no for r in race.runners]
+    rng = np.random.default_rng(0)
+    proj = ShotProjector(ts, ShotCalibration(+1, "right_of_travel", True), race.fps)
+    resolved = total = 0
+    for t, boxes, rail in render_boxes(race):
+        sx = 640 / 1920.0  # the pilot render scale: SL ≈ 27 px, 0.4 s displacement ≈ 4 px
+        jb = [Box(b.saddle_no, *(np.array([b.x1, b.y1, b.x2, b.y2]) * sx + rng.normal(0, 0.3, 4)), b.conf) for b in boxes]
+        f = proj.project(t, jb, (rail[0] * sx, rail[1] * sx), 0.9, saddles)
+        if t > 1.0:
+            total += 1
+            resolved += int(all(r.tier is not None for r in f.runners if r.detected))
+    assert resolved / total > 0.99, (resolved, total)

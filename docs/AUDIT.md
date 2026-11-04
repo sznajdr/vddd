@@ -14,6 +14,11 @@ Each entry: what was checked, what was wrong, what changed. Dates are when the f
 | 2026-11-04 | Draft cut | Unescaped `\|` in inline math broke a ledger table row (the RP-9 failure mode, reproduced in my own ledger). | Escaped; `lint_spec.py` checks column counts on both spec files in CI. |
 | 2026-11-04 | Synthetic tests | Three test fixtures contradicted the closed cover interval `[0.3, 2.0]` or sampled an invisible frame; one manifest pool violated its own break-count constraint. | Fixtures corrected; the code was right each time. |
 
+| 2026-11-04 | Pilot × EC-08 | Identity timelines dropped unsupported frames, so 2 % detector dropouts became single-frame `NOT_VISIBLE` holes and the edit score collapsed to 7 while IoU stayed 0.96. | `coast_gaps`: gaps ≤ `occl_max_s` are linearly interpolated with halved confidence (→ `LOW_CONF`), longer gaps stay `NOT_VISIBLE`; per-runner conf = axis conf × box conf so coasting is visible downstream. |
+| 2026-11-04 | Pilot seeded flags | Every runner raised a `lost` flag for the frames before its own prompt. | Flags are prompt-aware (`prompt_frames`). |
+| 2026-11-04 | **M4 §3.1 axis (RP-21)** | Per-frame motion axis from ~4 px displacements with 0.3 px jitter tilted up to 7° on some frames; since Δw ≈ (SL/SW)·l·sin δ this merged all lanes and made whole frames `UNKNOWN`. | Length-weighted axial mean, `axis_min_vector_sl` jitter guard, `axis_smooth_s` temporal smoothing that PCA frames never seed; §3.1 text amended (L-10b) with the ≈ 1° accuracy requirement; regression test with jittered boxes. |
+| 2026-11-04 | Headless replays | A scripted seeding replay produced wall-clock minutes of ~1e-6 that would have fed KG-1 / Q-7. | `SeedingSession.headless` marker; `pilot_run.py` ignores minutes from headless sessions unless `--human-minutes` is given for dry runs. |
+
 ## Open items found by the audit (owner decisions)
 
 - RP-11 (D-26 table gap), see `spec/RECON-2.0.0-patches.md`.

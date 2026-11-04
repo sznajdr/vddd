@@ -13,7 +13,9 @@ Per frame:
   4. canonicalize to +x (or +y when x == 0); orient by travel_direction_sign; u_lat sign so that
      increasing w = away from the rail (rail_side per shot);
   5. l = c·u_long / SL, w = c·u_lat / SW (origin = pack median; only differences matter);
-  6. rank_long, order_ambiguous, tier_cluster (median-linkage), absolute tier via rail reference.
+  6. rank_long, order_ambiguous, tier_cluster (median-linkage), absolute tier via rail reference;
+  7. per-runner conf = frame (axis) confidence × box confidence, so coasted or low-score boxes fall into
+     the LOW_CONF band (EC-08) without changing the base state.
 Degenerate frames (pack < pack_min_visible, unstable axis, missing calibration) -> conf = 0.
 """
 from __future__ import annotations
@@ -79,22 +81,26 @@ class FrameGeometry:
 
 
 def _axial_mean(vectors: np.ndarray, trim_deg: float) -> tuple[np.ndarray | None, float]:
-    """Robust unsigned mean direction of 2-D vectors (axial data). Returns (unit axis, resultant length)."""
-    v = vectors[np.linalg.norm(vectors, axis=1) > 1e-9]
+    """Robust unsigned mean direction of 2-D vectors (axial data), length-weighted: a short displacement
+    carries more relative jitter, so its direction counts less. Returns (unit axis, resultant length)."""
+    norms = np.linalg.norm(vectors, axis=1)
+    v = vectors[norms > 1e-9]
+    wts = norms[norms > 1e-9]
     if len(v) == 0:
         return None, 0.0
     ang = np.arctan2(v[:, 1], v[:, 0])
 
-    def mean_axis(a: np.ndarray) -> tuple[float, float]:
-        c, s = np.cos(2 * a).mean(), np.sin(2 * a).mean()
+    def mean_axis(a: np.ndarray, w: np.ndarray) -> tuple[float, float]:
+        w = w / w.sum()
+        c, s = float((w * np.cos(2 * a)).sum()), float((w * np.sin(2 * a)).sum())
         return 0.5 * math.atan2(s, c), float(math.hypot(c, s))
 
-    theta, r = mean_axis(ang)
+    theta, r = mean_axis(ang, wts)
     # one trim pass: drop vectors whose axial distance to the mean exceeds trim_deg
     d = np.abs(((ang - theta) + np.pi / 2) % np.pi - np.pi / 2)
     keep = d <= math.radians(trim_deg)
     if keep.sum() >= max(2, len(ang) // 2) and keep.sum() < len(ang):
-        theta, r = mean_axis(ang[keep])
+        theta, r = mean_axis(ang[keep], wts[keep])
     return np.array([math.cos(theta), math.sin(theta)]), r
 
 
@@ -132,6 +138,11 @@ class ShotProjector:
         self.min_visible = int(ts.get("pack_min_visible", 3))
         self.tie = float(ts["rank_tie_sl"])
         self.k_local = int(ts.get("axis_neighbourhood_k", 0))
+        self.min_vec_sl = float(ts.get("axis_min_vector_sl", 0.05))   # ignore displacements shorter than this (jitter)
+        self.smooth_s = float(ts.get("axis_smooth_s", 1.0))             # EMA time constant on the doubled-angle axis
+        self._axis_state: np.ndarray | None = None                       # smoothed (cos 2θ, sin 2θ)
+        self._axis_state_method = "none"
+        self._last_t: float | None = None
 
     def _motion_vectors(self, t: float, cents: dict[int, tuple[float, float]]) -> dict[int, np.ndarray]:
         past = None
@@ -143,9 +154,12 @@ class ShotProjector:
             return {}
         return {s: np.array(cents[s]) - np.array(past[s]) for s in cents if s in past}
 
-    def _axis(self, vecs: dict[int, np.ndarray], pts: np.ndarray) -> tuple[np.ndarray | None, str, float]:
-        if len(vecs) >= self.min_vec:
-            u, r = _axial_mean(np.stack(list(vecs.values())), self.trim_deg)
+    def _axis(self, vecs: dict[int, np.ndarray], pts: np.ndarray, sl: float) -> tuple[np.ndarray | None, str, float]:
+        """Per-frame unsigned axis estimate: motion (length-weighted axial mean of displacements longer
+        than axis_min_vector_sl·SL) else PCA of centroids; then temporally smoothed (see _smooth)."""
+        good = {s: v for s, v in vecs.items() if np.linalg.norm(v) >= self.min_vec_sl * sl}
+        if len(good) >= self.min_vec:
+            u, r = _axial_mean(np.stack(list(good.values())), self.trim_deg)
             if u is not None and r >= self.min_res:
                 return _canonical(u), "motion", float(min(1.0, r))
         if len(pts) >= 3:
@@ -153,6 +167,25 @@ class ShotProjector:
             _, _, vt = np.linalg.svd(centred, full_matrices=False)
             return _canonical(vt[0]), "pca", self.pca_conf
         return None, "none", 0.0
+
+    def _smooth(self, u: np.ndarray, conf: float, t: float, method: str = "motion") -> np.ndarray:
+        """Exponential smoothing of the unsigned axis on the doubled-angle circle (sign-free), weighted by
+        the per-frame confidence. Lateral coordinates are extremely sensitive to axis error
+        (Δw ≈ (SL/SW)·l·sin δ), so a single frame must not set the axis on its own (RP-21)."""
+        th = 2.0 * math.atan2(u[1], u[0])
+        obs = np.array([math.cos(th), math.sin(th)])
+        if (self._axis_state is None or self._last_t is None or self.smooth_s <= 0
+                or (self._axis_state_method == "pca" and method == "motion")):
+            self._axis_state = obs          # PCA frames never seed the smoother once motion is available
+            self._axis_state_method = method
+        else:
+            dt = max(1e-6, t - self._last_t)
+            alpha = min(1.0, conf * dt / self.smooth_s)
+            self._axis_state = (1 - alpha) * self._axis_state + alpha * obs
+        self._last_t = t
+        st = self._axis_state
+        half = 0.5 * math.atan2(st[1], st[0])
+        return _canonical(np.array([math.cos(half), math.sin(half)]))
 
     def project(self, t: float, boxes: list[Box], rail_ref_px: tuple[float, float] | None = None,
                 rail_ref_conf: float | None = None, all_saddles: list[int] | None = None) -> FrameGeometry:
@@ -176,9 +209,10 @@ class ShotProjector:
         sw = sl * self.sw_ratio
         pts = np.array([cents[s] for s in saddles], dtype=float)
         vecs = self._motion_vectors(t, cents)
-        u, method, conf = self._axis(vecs, pts)
+        u, method, conf = self._axis(vecs, pts, sl)
         if u is None:
             return degenerate()
+        u = self._smooth(u, conf, t, method)
         u_long = u * self.cal.travel_direction_sign
         u_lat = lateral_unit(u_long, self.cal.rail_side)
         frame.axis, frame.axis_method, frame.conf = (float(u_long[0]), float(u_long[1])), method, conf
@@ -212,8 +246,9 @@ class ShotProjector:
         clusters = cluster_tiers([w[s] for s in saddles], saddles, self.ts)
         tiers = absolute_tiers(clusters, w, rail_w, rail_conf, self.ts)
 
+        box_conf = {b.saddle_no: float(min(1.0, max(0.0, b.conf))) for b in boxes}
         frame.runners = [
-            RunnerGeometry(s, l[s], w[s], rank[s], clusters[s], tiers[s], amb[s], rail_w, rail_conf, conf, True)
+            RunnerGeometry(s, l[s], w[s], rank[s], clusters[s], tiers[s], amb[s], rail_w, rail_conf, conf * box_conf[s], True)
             for s in saddles
         ] + [RunnerGeometry(s, None, None, None, None, None, False, rail_w, rail_conf, 0.0, False) for s in missing]
         self.history.append((t, cents))
