@@ -29,6 +29,10 @@ pipeline against it once frozen.
 | `docs/` | Architecture, risk register, glossary, per-module agent prompts. `docs/research/` = state-of-the-art notes with sources; `docs/STACK-2.0.md` = proposed default stack. | Informative |
 | `data/` | Local data layout (gitignored). See `data/README.md`. | — |
 
+## New session?
+
+Read `docs/HANDOFF-NEXT-SESSION.md` first: reading order, green checks, the next block of work, owner-side items, phases.
+
 ## Current phase
 
 See `STATUS.md` (live) and `ROADMAP.md` (phases P0–P6 with exit gates).

@@ -8,4 +8,5 @@
 6. **Determinism (D-32):** no random UUIDs, no insertion-order IDs, no wall-clock in canonical payloads. Floats are quantized only in the canonical export, never inside comparisons.
 7. **Tests before acceptance.** Each module directory has a README with Input / Output / Acceptance / DoD. A module is not "done" until its acceptance fixture passes; stubs raise `NotImplementedError` with the spec section in the message.
 8. **Human protocols are not code.** `protocols/` are followed by the owner with a stopwatch and a notebook; tools in `tools/` only make recording easier.
-9. Run `make test && make lint-spec` before proposing a change.
+9. Run `make test && make lint-spec` before proposing a change. Run pytest LAST and unpiped (or with `set -o pipefail`) before any commit: a pipe hides its exit status.
+10. New session: start with `docs/HANDOFF-NEXT-SESSION.md`.
