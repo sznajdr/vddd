@@ -21,7 +21,8 @@ jobs:
       - run: python tools/lint_spec.py spec/SPEC-2.0.0-draft-LEDGER.md spec/registers/evidence_gated.yaml
       - run: python tools/cut_draft.py --check
       - run: if [ -f spec/SPEC-2.0.0.md ]; then python tools/lint_spec.py spec/SPEC-2.0.0.md spec/registers/evidence_gated.yaml; fi
-      - run: make freeze-dry-run
+      - run: python tools/lint_docs.py
+      - run: make dry-runs
   freeze-status:
     # Informative only: expected to fail until OD-1x instantiates the EG registry (D-36).
     runs-on: ubuntu-latest

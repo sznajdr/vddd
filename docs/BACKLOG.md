@@ -59,9 +59,10 @@ Status 2026-11-04. Everything below is doable in this repository without replays
 
 ## Suggested order
 
-1. **A1** (simulator with perspective and bends) — biggest reduction of geometric uncertainty for zero owner time.
-2. **A2 + A3** (signal gate harness and text parser) — the go/no-go becomes runnable; also useful on its own.
-3. **B1, B2, B3** (M1, M3 checks, runner QC) — no stubs left; the synthetic end-to-end run covers every module.
-4. ✅ **A5, A4, B6** (promotion script, calibration harness, DoD runner) — done 2026-11-04; the freeze-to-release path is mechanical and rehearsed.
-5. ✅ **C3, C6, C7, C8** done 2026-11-04 (C4 compute plan/benchmark still open) — the owner's first real day is de-risked.
-6. **D2** (invariant tests; D1 decisions are complete) — governance and robustness.
+Done 2026-11-04: A1–A5, B1–B3, B6, C3, C6–C8, D1, D2. Next, in this order:
+
+1. **B4** (M8 sidecars: parquet when pyarrow is present, store pointers + SHA-256 for the frames/geometry sidecars, the fixed race-fraction *calls* export view) — closes M8's DoD and lets a pipeline run feed `tools/export_calibration_inputs.py` directly.
+2. **B5** (M2 training scaffolding on synthetic COCO files; race-disjoint split from the manifest) — day-one readiness once frames are labelled.
+3. **C9** (changelog appender), **D4** (release alignment), **D3** (type checking / docs build) — governance hygiene.
+4. **C4** (compute plan + benchmark; needs owner hardware to produce numbers), **C5** (corpus status dashboard over the store).
+5. **C1, C2** (metadata ingest adapter, corpus registry) — need the owner's data.

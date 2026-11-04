@@ -15,7 +15,7 @@ replay + metadata
  M2 detect ──────────── stub (needs golden manifest for holdout)   ─┘
       │
       ▼
- M3 track + seeding ─── checks + live seeding loop IMPLEMENTED             ─┐ G-2
+ M3 track + seeding ─── checks + live seeding loop + id_assignments writer (RP-18) IMPLEMENTED ─┐ G-2
       │                                                                     │
       ▼                                                                     │
  M4 geometry ────────── tiering + cover + axis projection IMPLEMENTED       ─┘
