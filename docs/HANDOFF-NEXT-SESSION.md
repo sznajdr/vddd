@@ -1,6 +1,6 @@
 # Handoff — fresh session, start here
 
-_Updated 2026-11-04 after the continuation queue (C6, C8, C3, C7, RP-18, D2) and the documentation pass. Governing version: SPEC-2.0.0-draft. Work on PR #1 (`claude/elegant-newton-4ex3kg` → `main`); fetch first and preserve concurrent commits._
+_Updated 2026-11-05 for integration of PR #1 after the continuation queue (C6, C8, C3, C7, RP-18, D2) and documentation pass. Governing version: SPEC-2.0.0-draft. For subsequent work, fetch current `main` and create a new feature branch; do not resume the completed PR #1 branch. Preserve concurrent commits._
 
 ## 0. Read in this order (15 minutes)
 
@@ -83,7 +83,7 @@ Each item: what, acceptance, what NOT to do. Push after each coherent block; upd
 ## 6. Prompt to start the fresh session
 
 ```
-Repository: sznajdr/vddd (clone it; this is the Vincennes attelé trip-state project). Work on PR #1, branch claude/elegant-newton-4ex3kg into main; fetch first.
+Repository: sznajdr/vddd (clone it; this is the Vincennes attelé trip-state project). Fetch current main and create a new feature branch for the next block. PR #1 delivered the prior block; do not resume its branch.
 Read docs/HANDOFF-NEXT-SESSION.md first and follow its reading order, then run make check, make freeze-check (expected to fail), make dry-runs, make pilot-demo.
 Then build the next block exactly as §2 of the handoff specifies, in order: B4 (M8 sidecars, export views, migration), B5 (M2 training scaffolding on synthetic data), C9 (changelog appender), D4 (release alignment), D3 (type checking), C4/C5 (compute plan, corpus dashboard).
 Rules: cite SPEC-2.0.0-draft; numbers are config (D-18); never edit the generated draft by hand (ledger + tools/cut_draft.py); never run the real promotion, calibration, charting or training (D-36); tests before acceptance; make check green before every commit (pytest last, unpiped); no model identifiers in commits; keep tools/README.md, package READMEs and STATUS.md current (make lint-docs).

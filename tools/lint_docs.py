@@ -60,7 +60,7 @@ def check_make_targets() -> list[str]:
     targets = makefile_targets()
     problems = []
     for p in sorted(ROOT.glob("**/*.md")):
-        rel = str(p.relative_to(ROOT))
+        rel = p.relative_to(ROOT).as_posix()
         if any(part in {".git", "data", "__pycache__", ".pytest_cache", ".ruff_cache", "research", "decisions"} for part in p.parts) or rel in PLAN_DOCS:
             continue
         for m in MAKE_RE.finditer(p.read_text(encoding="utf-8")):

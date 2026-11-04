@@ -15,7 +15,7 @@ from tripstate.synth import render_boxes, scripted_race
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
-from export_calibration_inputs import export
+from export_calibration_inputs import export  # noqa: E402 -- import the repository tool after bootstrapping its directory
 
 
 def test_frames_json_round_trips_every_runner_field(ts):

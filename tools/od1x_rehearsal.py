@@ -99,9 +99,9 @@ def main() -> int:
     diff = {k: (proposals.get(k, {}).get("value"), v) for k, v in expected.items() if proposals.get(k, {}).get("value") != v}
     extra = sorted(set(proposals) - set(expected))
     if diff or extra or warnings:
-        print(f"   MISMATCH vs {EXPECTED.relative_to(ROOT)}: differing {diff}, unexpected keys {extra}, warnings {warnings}")
+        print(f"   MISMATCH vs {EXPECTED.relative_to(ROOT).as_posix()}: differing {diff}, unexpected keys {extra}, warnings {warnings}")
         return 1
-    print(f"   matches {EXPECTED.relative_to(ROOT)} ({len(expected)} keys)")
+    print(f"   matches {EXPECTED.relative_to(ROOT).as_posix()} ({len(expected)} keys)")
 
     print("== 5. on the real day (protocols/OD-1x/PROTOCOL.md):")
     print("   cp protocols/OD-1x/sheets/*.csv data/od1x/        # fill them during the afternoon")

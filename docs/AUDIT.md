@@ -53,3 +53,10 @@ Earlier table rows are historical findings. The owner delegated the remaining ve
 - Ruff conventions explicitly retain established compact reference code and mathematical names, with import bootstrapping permitted only in tools; the lambda and redundant semicolon were fixed.
 
 Remaining work is the implementation queue in the handoff plus real external evidence. No unresolved design approval is a blocker.
+
+## PR integration cleanup (2026-11-05, SPEC-2.0.0-draft)
+
+- Normalize docs-linter relative paths to POSIX before comparing with the plan-document allowlist. Windows previously treated the future typecheck target in the handoff as a missing current target.
+- Mark the two intentional test imports after tool-path bootstrapping with targeted E402 annotations; no global lint relaxation.
+- The next-session handoff starts from current main on a new branch after PR #1, rather than resuming the completed delivery branch. The next coding block and evidence gates are unchanged.
+- Rehearsal fixture paths print with POSIX separators on every platform; the Windows path-separator assertion now passes (the full run had 193 other passes).
