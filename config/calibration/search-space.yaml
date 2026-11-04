@@ -1,0 +1,15 @@
+# Calibration search space — SPEC-2.0.0-draft §7.2 step 2 (D-18). Declares WHICH threshold keys calibration may move
+# and the grid each is searched over. Keys not listed are never touched by tools/calibrate.py. The objective
+# (§6.2 headline) and the constraints (mask floors, candidate-load cap, held-out gap limit) live in the threshold
+# set's `calibration` namespace, not here: numbers are config, this file is the space.
+# MUST NOT be run for real before the 2.0.0 freeze (D-36); evidence-gated keys are refused by the tool.
+# Cost: candidates = product of grid sizes; each candidate re-runs M5 on every dev race (seconds per race in pure
+# Python at 25 fps x 14 runners x 3 min). 75 candidates x 30 dev races is about an hour; keep the grid small and
+# widen one axis at a time. Bayesian search is the planned successor (same objective, same constraints).
+search_space_version: 1
+method: grid
+objective: headline_score
+keys:
+  cover_lat_sw:      {values: [0.6, 0.7, 0.8, 0.9, 1.0], used_in: "§2.2 cover predicate (D-26)"}
+  same_tier_sw:      {values: [0.4, 0.5, 0.6, 0.7, 0.8], used_in: "§2.2 tier clustering"}
+  min_state_s:       {values: [0.8, 1.0, 1.2], used_in: "§3.4 minimum segment duration"}

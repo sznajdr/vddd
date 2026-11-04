@@ -1,0 +1,11 @@
+race_id,location,video_timecode_s,sl_px,lane_gap_px,lane_gap_in_sl,cover_lat_px,cover_lat_in_sl,rail_screen_side,gap_ge_6sl_seen,n_visible,view_angle_deg,fence_rail_px,both_lines_visible,camera_position,axis_lateral_error_sw,notes
+# location in {near_straight,far_straight,bend}; rail_screen_side in {bottom,top,left,right}; axis_lateral_error_sw is read from the bend frame (research 05, RP-20)
+SYN-AUTO,near_straight,90.0,80,30,0.375,22,0.275,bottom,0,14,70,470,1,stands,,
+SYN-AUTO,far_straight,150.0,42,10,0.238,7,0.167,top,0,11,20,110,0,stands,,
+SYN-AUTO,bend,185.0,60,21,0.350,15,0.250,bottom,1,13,45,300,1,stands,0.3,
+SYN-VFLAT,near_straight,80.0,82,32,0.390,23,0.280,bottom,0,12,72,480,1,stands,,
+SYN-VFLAT,far_straight,170.0,44,11,0.250,8,0.182,top,0,12,18,120,0,stands,,
+SYN-VFLAT,bend,230.0,61,22,0.361,16,0.262,bottom,0,12,47,310,1,stands,0.4,
+SYN-VHCP,near_straight,100.0,79,29,0.367,21,0.266,bottom,1,13,69,460,1,stands,,
+SYN-VHCP,far_straight,200.0,41,9,0.220,7,0.171,top,0,10,19,105,0,stands,,
+SYN-VHCP,bend,260.0,58,20,0.345,15,0.259,bottom,0,13,44,290,1,stands,0.2,

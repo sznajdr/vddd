@@ -1,0 +1,11 @@
+race_id,start_type,pass_no,t0_video_s,tend_video_s,first_past_saddle_no,official_elapsed_norm_s,recall_suspected,notes
+# residual = (tend_video_s - t0_video_s) - official_elapsed_norm_s is computed by tools/instantiate_eg.py
+SYN-AUTO,autostart,1,60.00,218.40,7,158.1,0,
+SYN-AUTO,autostart,2,60.08,218.44,7,158.1,0,
+SYN-AUTO,autostart,3,59.96,218.36,7,158.1,0,
+SYN-VFLAT,volte,1,45.20,264.90,3,218.5,0,
+SYN-VFLAT,volte,2,45.00,264.86,3,218.5,0,
+SYN-VFLAT,volte,3,45.36,264.92,3,218.5,0,
+SYN-VHCP,volte,1,70.10,297.60,11,226.3,0,back-marker winner at 2900 m
+SYN-VHCP,volte,2,69.90,297.56,11,226.3,0,
+SYN-VHCP,volte,3,70.20,297.64,11,226.3,0,

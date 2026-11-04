@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_eg_keys_exist_in_threshold_set(ts):
     eg = yaml.safe_load((ROOT / "spec/registers/evidence_gated.yaml").read_text())
-    named_checks = {"sw_ratio_location_variation", "detach_sl_prevalence", "seeding_feasible", "dod3_median_target_min"}
+    named_checks = {"sw_ratio_location_variation", "detach_sl_prevalence", "seeding_feasible"}  # not threshold keys
     for e in eg["entries"]:
         if e["key"] in named_checks:
             continue
@@ -21,7 +21,9 @@ def test_eg_keys_exist_in_threshold_set(ts):
 def test_every_eg_flagged_threshold_is_in_registry(ts):
     eg = yaml.safe_load((ROOT / "spec/registers/evidence_gated.yaml").read_text())
     keys = {e["key"] for e in eg["entries"]}
-    missing = [k for k in ts.evidence_gated_keys() if k not in keys and k not in {"sw_ratio", "normalized_fps", "stratum_yield_review_factor"}]
+    # stratum_yield_review_factor: marked [EG] in the draft but it has no instrument (a D-35 review-trigger policy
+    # number); owner decision pending (docs/AUDIT.md). The promotion refuses while it is unbound.
+    missing = [k for k in ts.evidence_gated_keys() if k not in keys and k not in {"stratum_yield_review_factor"}]
     assert not missing, missing
 
 

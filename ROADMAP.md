@@ -10,8 +10,8 @@ Owner-hour estimates are rough and informative only.
 | P2 | OD-1x — one afternoon on footage | Six protocol steps recorded for 3 replays (autostart / flat volte / handicap volte); sheets in `data/od1x/`; `instantiate_eg.py` produces a filled registry. | 4–6 |
 | P3 | Signal gate (parallel with P2) | Notule trip phrases from prior races tested against closing odds; a written go/no-go on whether trip data plausibly adds edge. | 6–10 |
 | P4 | 5-race throwaway pilot | Pilot stack (exempt from G-1…G-3) runs end-to-end on 5 races; kill-gates evaluated; yield per stratum reported. | 10–20 |
-| P5 | Freeze 2.0.0 | EG registry instantiated, kill-gates pass, `freeze_check.py` green, D-26…D-36 appended, one commit promotes DRAFT → FROZEN. | 2 |
-| P6 | Build M0→M8 + golden charting (OD-3) | Per-module acceptance tests pass in order with gates G-1…G-4; 30/10 golden set charted; DoD-1…6 evaluated at a declared freeze. | 60–90 |
+| P5 | Freeze 2.0.0 | EG registry instantiated, kill-gates pass, `freeze_check.py` green, D-26…D-36 appended, one commit promotes DRAFT → FROZEN. **Tooling ready:** `tools/promote_draft.py` (rehearsed by `make freeze-dry-run`); `[OPEN]` markers and `stratum_yield_review_factor` must be resolved first. | 2 |
+| P6 | Build M0→M8 + golden charting (OD-3) | Per-module acceptance tests pass in order with gates G-1…G-4; 30/10 golden set charted; calibration (`tools/calibrate.py`, §7.2) then DoD-1…6 evaluated at a declared freeze (`tools/evaluate_release.py`). | 60–90 |
 
 Total to a ~600-race chartable corpus: roughly 90–120 owner-hours plus agent build time.
 

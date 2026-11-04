@@ -1,0 +1,183 @@
+# SYNTHETIC registry template for the freeze dry run = spec/registers/evidence_gated.yaml + one synthetic entry.
+# Regenerated/verified by tests/test_promote_draft.py; never copy this file over the real registry.
+# Evidence-gated registry (RECON §4; D-36).
+# Every entry blocks the 2.0.0 freeze until `instantiated: true` with a `value`,
+# an `evidence` pointer (OD-1x sheet + row range) and a `date`.
+# tools/freeze_check.py reads this file. tools/instantiate_eg.py fills it from OD-1x sheets.
+#
+# Fields:
+#   key           threshold-set key (or named check)
+#   provisional   value written in the draft until instantiated
+#   instrument    what OD-1x measures
+#   rule          how the value is derived from the measurement
+#   instantiated  false until evidence lands
+#   value         instantiated value (null until then)
+#   evidence      path/rows of the sheet the value was derived from
+#   date          ISO date of instantiation
+
+registry_version: 1
+source_protocol: protocols/OD-1x/PROTOCOL.md
+entries:
+  - key: anchor_offset_volte_s
+    provisional: 0.0
+    instrument: "3 repeated t_0 + t_end clicks per volte replay vs official_elapsed_norm_s (sheet_anchors.csv)"
+    rule: "median signed residual (video duration - official) over volte replays"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: anchor_offset_autostart_s
+    provisional: 0.0
+    instrument: "same, autostart replays"
+    rule: "median signed residual over autostart replays"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: anchor_tol_volte_s
+    provisional: 2.0
+    instrument: "same sheet"
+    rule: "max(0.5, ~p95 of |residual - offset|) over volte replays"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: anchor_tol_autostart_s
+    provisional: 2.0
+    instrument: "same sheet"
+    rule: "max(0.5, ~p95 of |residual - offset|) over autostart replays"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: cover_lat_sw
+    provisional: 0.8
+    instrument: "frame eyeball on 14-runner fields (sheet_geometry.csv): lateral gap of real off-the-wheel cover positions, in SW"
+    rule: "set so that observed real cover positions classify as covered; report min/max observed"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: same_tier_sw
+    provisional: 0.6
+    instrument: "sheet_geometry.csv: adjacent-lane lateral separation in SW, per track location"
+    rule: "sanity only: confirm adjacent lanes separate by > same_tier_sw at every location; else recalibrate before M4 work (RP-5)"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: max_tier_span_sw
+    provisional: 1.2
+    instrument: "same frames"
+    rule: "sanity: a single lane's observed spread must stay < max_tier_span_sw"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: sw_ratio_location_variation
+    provisional: null
+    instrument: "sheet_geometry.csv: apparent lane width / SL at near straight, far straight, bend (RP-5)"
+    rule: "ratio max/min across locations; > 2.0 triggers per-shot sw_ratio (owner decision)"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: coverage_race_min
+    provisional: 0.65
+    instrument: "sheet_coverage.csv: % wide-pan over [t_0, t_end]"
+    rule: "confirm all 3 replays clear the gate; else gate or corpus definition revisited before charting"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: coverage_final_third_min
+    provisional: 0.70
+    instrument: "sheet_coverage.csv: % wide-pan over final third"
+    rule: "same"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: human_budget_cap_min
+    provisional: 8
+    instrument: "sheet_seeding.csv (OD-1x) + 5-race pilot human-minutes"
+    rule: "~p90 of pilot human-minutes, rounded up to whole minutes; must be >= 1.5 x DoD-3 target"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: dod3_median_target_min
+    provisional: 5
+    instrument: "pilot human-minutes"
+    rule: "pilot median rounded up"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: finish_evidence_min_k
+    provisional: 3
+    instrument: "sheet_finish.csv: observed crossing counts per finish shot"
+    rule: "lower only if typical finish shots observe < 3 crossings AND order remains unambiguous"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: detach_sl_prevalence
+    provisional: 6.0
+    instrument: "sheet_geometry.csv: count of >= 6 SL gaps observed"
+    rule: "no change expected; confirms D-28 rarity premise; record count"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: track_width_sl
+    provisional: 5.8
+    instrument: "track plan or paced measurement of rail-to-fence width, divided by SL_world (OD-1x step 4 can also read it from a frame where both lines are visible)"
+    rule: "only needed if lateral_scale_mode becomes rail_fence (RP-19); then value := width_m / SL_m"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: axis_neighbourhood_k
+    provisional: 0
+    instrument: "sheet_geometry.csv bend frame: lateral spread of the pack along a straight axis vs a local axis (research 05, RP-20)"
+    rule: "stay 0 unless the bend frame shows > 0.5 SW of axis-induced lateral error; then the smallest k that removes it"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: seeding_feasible
+    provisional: null
+    instrument: "sheet_seeding.csv: seconds to assign all saddle numbers from first stable wide-pan frame"
+    rule: "record per race; feeds kill-gate KG-1; falsifies/confirms D-01 human premise"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: normalized_fps
+    provisional: 25.0
+    instrument: "sheet_race.csv: native fps of the three replays (ffprobe); the draft marks M0's normalized_fps [EG: OD-1x]"
+    rule: "the replays' common native fps (expected 25, PAL broadcast); replays with differing fps -> owner decision before the freeze, key stays un-instantiated"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: sw_ratio
+    provisional: 0.35
+    instrument: "sheet_geometry.csv through sw_ratio_location_variation (RP-5); TS-0.0.0 flags sw_ratio eg: true"
+    rule: "confirmed at the provisional value iff sw_ratio_location_variation <= 2.0; otherwise per-shot sw_ratio_method (owner decision, additional MAJOR justification) and this key stays un-instantiated"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  # --- SYNTHETIC ENTRY, dry run only (tests/fixtures/od1x_synthetic): the real registry has no entry for this
+  # key because it has no instrument (owner decision, docs/AUDIT.md). It exists here so the promotion mechanics
+  # can be rehearsed end to end.
+  - key: stratum_yield_review_factor
+    provisional: 0.5
+    instrument: "SYNTHETIC: none (policy number, D-35 review trigger)"
+    rule: "SYNTHETIC: kept at provisional"
+    instantiated: true
+    value: 0.5
+    evidence: "SYNTHETIC fixture tests/fixtures/od1x_synthetic (not evidence)"
+    date: "2026-11-04"

@@ -74,6 +74,23 @@ qc:
 yield:
   stratum_yield_review_factor: {value: 0.5, eg: true, used_in: "§6.2 per-stratum chartable trigger (D-35)"}
 
+# §0.2 / §6.3 acceptance numbers and §7.2 calibration constraints are versioned threshold values too (D-18; §0.2:
+# "threshold values in DoD-1/2 MAY be revised via §7 with a version bump; the structure MUST NOT change").
+release:
+  dod1_mask_iou_min: {value: 0.85, used_in: "DoD-1: uncovered-outside mask IoU and covered-mask IoU floors on held-out (D-27)"}
+  dod2_break_recall_min: {value: 0.80, used_in: "DoD-2: pre-review break-candidate recall point estimate (D-31)"}
+  dod2_min_heldout_breaks: {value: 10, used_in: "§6.1 / §6.3: break recall is invalid below this many observable held-out BREAK starts"}
+  dod3_median_target_min: {value: 5, eg: true, used_in: "DoD-3: median human-minutes per eligible attempt (pilot median rounded up; D-29)"}
+  dod3_min_attempts: {value: 20, used_in: "DoD-3 denominator: consecutive eligible attempts incl. over_budget"}
+  dod6_min_pass: {value: 8, used_in: "DoD-6: held-out races that must pass Q-1 through Q-6"}
+  dod6_heldout_n: {value: 10, used_in: "DoD-6 denominator = §6.1 held-out size"}
+
+calibration:
+  uncovered_outside_iou_floor: {value: 0.85, used_in: "§7.2 constraint: M5 acceptance floor on dev (pre-calibration)"}
+  covered_iou_floor: {value: 0.85, used_in: "§7.2 constraint: M5 acceptance floor on dev (pre-calibration)"}
+  candidate_load_median_max: {value: 4, used_in: "§7.2 constraint: M6 candidate volume per M6-evaluable attempt, median"}
+  heldout_gap_max_pt: {value: 10, used_in: "§7.2 step 4: dev minus held-out headline gap (points) above which the spec, not the thresholds, is suspect"}
+
 # Module-defined namespaces (§7.1): keys proposed from the research pack (docs/research/). Values are
 # module defaults to be tuned in §7 calibration; they are NOT physics and NOT OD-1x evidence-gated.
 m1_shots:

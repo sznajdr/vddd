@@ -1,0 +1,13 @@
+race_id,shot_seq,shot_type,t_start_video_s,t_end_video_s,graphic_over_runners,notes
+# shot_type in {wide_pan,head_on,tight,replay_insert,graphic_fullscreen,other}; graphic_over_runners in {0,1}
+SYN-AUTO,1,wide_pan,55.0,120.0,0,
+SYN-AUTO,2,head_on,120.0,135.0,0,
+SYN-AUTO,3,wide_pan,135.0,205.0,1,lower third 150-158
+SYN-AUTO,4,tight,205.0,210.0,0,
+SYN-AUTO,5,wide_pan,210.0,220.0,0,
+SYN-VFLAT,1,wide_pan,40.0,150.0,0,
+SYN-VFLAT,2,replay_insert,150.0,162.0,0,
+SYN-VFLAT,3,wide_pan,162.0,266.0,0,
+SYN-VHCP,1,wide_pan,65.0,140.0,0,
+SYN-VHCP,2,head_on,140.0,160.0,0,
+SYN-VHCP,3,wide_pan,160.0,299.0,1,odds banner 170-176

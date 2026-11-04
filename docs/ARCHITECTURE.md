@@ -36,6 +36,10 @@ replay + metadata
  golden / charting ──── manifest tool (§6.1) and BORIS converter (RP-17) IMPLEMENTED
  pilot / seeding ────── throwaway stack: ffmpeg frames, oracle/blob detectors, IoU tracker, seed assignment,
                         oracle/SAM2 propagation, IDF1/IDSW, race runner, kill-gate report; seeding-session core + CLI
+ release ────────────── D-36 freeze check (registry + kill-gates + [EG] marker binding), OD-1x/pilot instantiation,
+                        promotion DRAFT → FROZEN, DoD-1…6 release evaluation — IMPLEMENTED, rehearsed on synthetic fixtures
+ calibration ────────── §7.2 harness: geometry sidecars → re-derived tiers → M5 → headline; grid search, provenance,
+                        held-out gap rule — IMPLEMENTED, refused for real while DRAFT
 ```
 
 Run the chain yourself: `tripstate synth-demo` (per-runner mask IoUs and edit scores against the scripted truth, gates, canonical SHA).
@@ -64,3 +68,38 @@ Run the chain yourself: `tripstate synth-demo` (per-runner mask IoUs and edit sc
 ## Determinism boundary (D-32)
 
 Full-precision floats everywhere inside the pipeline. Quantization happens once, in `m8_storage.canonical`, for the hashable export. GPU nondeterminism is tolerated at the detection layer and absorbed by quantization; environment knobs are recorded under `producer_version`.
+
+## Freeze → calibration → release (tooling, rehearsed; nothing has run for real)
+
+```
+OD-1x sheets + pilot reports ──instantiate_eg.py──▶ evidence_gated.yaml (instantiated)
+pilot reports ────────────────pilot_report.py────▶ kill_gates.yaml (KG-1…KG-4 statuses)
+                                                        │
+                      freeze_check.py  = tripstate.release.freeze: EG instantiated? gates pass? every `[EG]` marker
+                                          in the draft bound to a registry entry / kill-gate? no `[OPEN]` left?
+                                                        │ exit 0
+                      promote_draft.py = tripstate.release.promote (one commit):
+                          SPEC-2.0.0-draft.md ──▶ SPEC-2.0.0.md   (FROZEN header + freeze record; D-26…D-36 in §1;
+                                                                   markers → frozen values; changelog row; §7.1 → frozen TS)
+                          TS-0.0.0-provisional ──▶ TS-2.0.0-frozen.yaml (registry values, eg: false, search_provenance: freeze)
+                          DECISION-LOG.md       ──▶ Pending → Closed (SPEC-2.0.0 §1)
+                          version.py            ──▶ SPEC_VERSION 2.0.0, FROZEN  (load_default() then returns the frozen set)
+                                                        │
+   golden_manifest.py build (now allowed) → hand charts (OD-3) → pipeline runs → geometry sidecars (tripstate.calibration.sidecar)
+                                                        │
+                      calibrate.py = tripstate.calibration: grid over config/calibration/search-space.yaml on DEV races,
+                          candidate TS → re-derive tiers from stored geometry → chart_race → §6.2 headline; constraints from
+                          TS `calibration` namespace → TS-2.x.yaml (calibrated: true, search_provenance) → --heldout ONCE
+                          (> heldout_gap_max_pt → spec_revision, not more tuning)
+                                                        │
+                      evaluate_release.py = tripstate.release.evaluate: store(+ second run) + manifest → DoD-1…6 with
+                          pass/fail/invalid reasons, headline with/without Q-7 (D-35), per-stratum tables,
+                          data/releases/<version>/evaluation.md + §14 changelog row draft
+```
+
+Every floor and constraint these tools apply is a threshold-set value (`release` and `calibration` namespaces, D-18).
+Rehearsals that never touch the repository: `make freeze-dry-run` (synthetic OD-1x sheets → instantiated registry →
+simulated promotion with diffs), `make calibrate-dry-run` (mis-set thresholds recovered), `make evaluate-dry-run`
+(synthetic store, every DoD line). The real promotion additionally rehearses itself in `tests/test_promote_draft.py`
+on an isolated copy of the repository (idempotent second run, `freeze_check` green afterwards).
+
