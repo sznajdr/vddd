@@ -18,21 +18,25 @@ replay + metadata
  M3 track + seeding ─── EC-12 arithmetic IMPLEMENTED · checks/tool stubs   ─┐ G-2
       │                                                                     │
       ▼                                                                     │
- M4 geometry ────────── tiering + cover IMPLEMENTED · projection stub      ─┘
+ M4 geometry ────────── tiering + cover + axis projection IMPLEMENTED       ─┘
       │                                                                     ┐ G-3
       ▼                                                                     │
  M5 states ──────────── classification + smoothing + segments IMPLEMENTED  ─┘
       │
       ▼
- M6 events ──────────── positions_lost IMPLEMENTED · detector stub
+ M6 events ──────────── positions_lost + UNCALIBRATED reference detector IMPLEMENTED
       │
       ▼
  M7 QC ──────────────── gates + yield + SHOT_GAP + coverage IMPLEMENTED · runner_qc stub
       │
       ▼
- M8 storage ─────────── canonical export IMPLEMENTED · DDL drafted · store stub
+ M8 storage ─────────── canonical export + SQLite store IMPLEMENTED
  evaluation ─────────── §6.2 metrics + §6.4 audit sampler IMPLEMENTED (tripstate.evaluation)
+ synth ──────────────── scripted races → pixel boxes; end-to-end test M4→M5→M7→M8 passes
+ golden / charting ──── manifest tool (§6.1) and BORIS converter (RP-17) IMPLEMENTED
 ```
+
+Run the chain yourself: `tripstate synth-demo` (per-runner mask IoUs and edit scores against the scripted truth, gates, canonical SHA).
 
 "IMPLEMENTED" means a pure-function reference implementation of a structurally frozen rule, reading every number from a threshold set. None of it is calibrated. None of it has seen a frame of video.
 

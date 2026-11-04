@@ -21,6 +21,11 @@ geometry:
   cover_lat_sw: {value: 0.8, eg: true, used_in: "§2.2 (L-11, D-26)"}
   detach_sl: {value: 6.0, used_in: "§2.4 (value unchanged; OD-1x only confirms rarity, see detach_sl_prevalence)"}
   rail_ref_conf_min: {value: 0.5, used_in: "EC-13 (M4 namespaced rail-reference confidence; module default, tuned in §7)"}
+  axis_min_vectors: {value: 3, used_in: "§3.1 motion-axis needs this many motion vectors (module default)"}
+  axis_min_resultant: {value: 0.7, used_in: "§3.1 axial resultant length below which the motion axis is unstable -> PCA fallback"}
+  axis_pca_conf: {value: 0.6, used_in: "§3.1 confidence assigned to PCA-fallback frames"}
+  axis_trim_deg: {value: 45, used_in: "§3.1 outlier trim for motion vectors"}
+  pack_min_visible: {value: 3, used_in: "§3 / EC-02 fewer visible runners -> conf 0"}
   axis_neighbourhood_k: {value: 0, eg: true, used_in: "§3.1 principal axis fitted on k nearest runners (0 = whole pack); research 05 bends proposal"}
 
 smoothing:

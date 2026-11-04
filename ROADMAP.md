@@ -6,7 +6,7 @@ Owner-hour estimates are rough and informative only.
 | Phase | Name | Exit gate | Est. owner-hours |
 |---|---|---|---|
 | P0 | Foundation (this repo) | Repo scaffolded; EG registry + kill-gates machine-readable; evidence-independent logic unit-tested. | done (agent) |
-| P1 | Cut SPEC-2.0.0-draft | All §6 RECON deltas + `RECON-2.0.0-patches.md` applied; every provisional number carries an `[EG: OD-1x]` marker; `lint-spec` passes. | 3–5 (review) |
+| P1 | Cut SPEC-2.0.0-draft | **Done (agent, 2026-11-04):** 63 ledger edits applied by `tools/cut_draft.py`; 24 `[EG]` markers; `lint-spec` and `cut_draft.py --check` in CI. Owner review of the draft remains. | 3–5 (review) |
 | P2 | OD-1x — one afternoon on footage | Six protocol steps recorded for 3 replays (autostart / flat volte / handicap volte); sheets in `data/od1x/`; `instantiate_eg.py` produces a filled registry. | 4–6 |
 | P3 | Signal gate (parallel with P2) | Notule trip phrases from prior races tested against closing odds; a written go/no-go on whether trip data plausibly adds edge. | 6–10 |
 | P4 | 5-race throwaway pilot | Pilot stack (exempt from G-1…G-3) runs end-to-end on 5 races; kill-gates evaluated; yield per stratum reported. | 10–20 |

@@ -1,6 +1,6 @@
 # M8 — Storage & Versioning
 
-**Spec:** §9, §4 M8; ledger L-37…L-40; D-13, D-32. **Status:** canonical export implemented and tested; store stubbed; DDL drafted in `../schema/ddl.sql`.
+**Spec:** §9, §4 M8; ledger L-37…L-40; D-13, D-32. **Status:** canonical export and SQLite store implemented and tested: DDL applied from `../schema/ddl.sql`, JSON array columns, chartable-only default reads, diagnostic override only on `state_segments()`, `feature_export()` rejects overrides structurally, per-table canonical SHA with version coexistence.
 
 | | |
 |---|---|

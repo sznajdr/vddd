@@ -1,10 +1,10 @@
 # STATUS — live board
 
-_Last updated: 2026-11-04 (agent scaffold)._ Update this file whenever a phase gate moves.
+_Last updated: 2026-11-04 (agent scaffold, research pack, P1 draft cut)._ Update this file whenever a phase gate moves.
 
 ## Phase
 
-**P1 — cut SPEC-2.0.0-draft.** P0 (foundation) complete.
+**P1 complete: `spec/SPEC-2.0.0-draft.md` is the full prose draft** (cut from 1.2.0 by `tools/cut_draft.py`, 63 edits; the ledger stays as `SPEC-2.0.0-draft-LEDGER.md`). **Next: P2 (OD-1x) and P3 (signal gate)**, both owner-side; P4's throwaway pilot stack can be built by an agent whenever replays exist.
 
 ## Facts established
 
@@ -44,6 +44,11 @@ _Last updated: 2026-11-04 (agent scaffold)._ Update this file whenever a phase g
 - [x] M7 SHOT_GAP events + coverage fractions
 - [x] §6.2 metrics (mask IoUs, headline, Wilson CI, break matching, edit score, F1@k) + §6.4 audit sampler with operating characteristic
 - [x] Research pack `docs/research/` (10 notes + sources) and `docs/STACK-2.0.md`
+- [x] P1: full prose SPEC-2.0.0-draft cut reproducibly (`tools/cut_draft.py --check` in CI)
+- [x] M4 principal-axis projection (`ShotProjector`) + synthetic race simulator; end-to-end M4→M5→M7→M8 test passes against scripted truth
+- [x] M8 SQLite store (DDL, chartable-only reads, structural D-11 guard, canonical SHA per table, version coexistence)
+- [x] M6 uncalibrated reference detector; golden manifest tool (§6.1, S-6); BORIS→hand_charts converter (RP-17)
+- [x] CI workflow, `tripstate` CLI (`ingest-video`, `synth-demo`, `evaluate`), audit fixes (`docs/AUDIT.md`)
 
 ## Research pack (2026-11-04)
 

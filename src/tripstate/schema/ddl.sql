@@ -144,7 +144,8 @@ CREATE TABLE IF NOT EXISTS hand_charts (
 );
 
 CREATE TABLE IF NOT EXISTS events (
-  race_id TEXT NOT NULL, saddle_no INTEGER, event_id INTEGER NOT NULL,
+  race_id TEXT NOT NULL, saddle_no INTEGER NOT NULL DEFAULT 0,   -- 0 = race-level (SHOT_GAP)
+  event_id INTEGER NOT NULL,
   type TEXT NOT NULL CHECK (type IN ('BREAK','SHOT_GAP')),
   t_start_frac REAL NOT NULL, t_end_frac REAL,
   positions_lost INTEGER, positions_lost_basis_n INTEGER,         -- L-15 (F-7)
@@ -156,7 +157,8 @@ CREATE TABLE IF NOT EXISTS events (
   dai_tag TEXT CHECK (dai_tag IN ('dai_uncaught_break_expected','dai_gait_other')),  -- L-26
   extractor_version TEXT, threshold_set_version TEXT,
   schema_version TEXT NOT NULL, producer_version TEXT NOT NULL, created_at TEXT NOT NULL,
-  PRIMARY KEY (race_id, saddle_no, event_id, producer_version)
+  PRIMARY KEY (race_id, saddle_no, event_id, producer_version),
+  CHECK ((type = 'SHOT_GAP') = (saddle_no = 0))   -- SHOT_GAP is race-level
 );
 
 CREATE TABLE IF NOT EXISTS qc (

@@ -39,11 +39,15 @@ def evaluate_gates(inp: RaceQCInput, ts: ThresholdSet) -> GateResult:
         codes.add("anchor_missing")
     elif inp.anchor_suspect:
         codes.add("anchor_suspect")
-    # Q-1 / Q-2 require anchors to be defined at all; without anchors coverage is undefined.
-    if inp.coverage_race is None or inp.coverage_race < float(ts["coverage_race_min"]):
-        codes.add("coverage_race_low")
-    if inp.coverage_final_third is None or inp.coverage_final_third < float(ts["coverage_final_third_min"]):
-        codes.add("coverage_final_third_low")
+    # Q-1 / Q-2: coverage is undefined without anchors (anchor_missing already fails the race);
+    # with anchors present an undefined coverage is a pipeline bug, not a gate outcome.
+    if inp.anchors_present:
+        if inp.coverage_race is None or inp.coverage_final_third is None:
+            raise ValueError("coverage fractions must be computed when anchors are present (M7)")
+        if inp.coverage_race < float(ts["coverage_race_min"]):
+            codes.add("coverage_race_low")
+        if inp.coverage_final_third < float(ts["coverage_final_third_min"]):
+            codes.add("coverage_final_third_low")
     if inp.id_suspect:
         codes.add("id_suspect")
     if inp.pct_graphic_occluded > float(ts["graphic_occlusion_max"]):

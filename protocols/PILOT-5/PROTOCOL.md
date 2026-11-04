@@ -17,7 +17,7 @@
 | Detection | Off-the-shelf detector (COCO `horse` class or a zero-shot detector) with boxes expanded to the sulky. No training. |
 | Tracking | ByteTrack as shipped with Ultralytics. |
 | Seeding | The `tools/seed_cli.py` skeleton: step frames, click runner → type saddle number, log wall-clock. |
-| Geometry | `tripstate.m4_geometry` reference functions on the tracked centroids. |
+| Geometry | `tripstate.m4_geometry.ShotProjector` on the tracked boxes (rail reference clicked once per shot; `ShotCalibration` confirmed by the operator). |
 | Labels | Owner hand-labels tier for ≥ 60 frames per race (≥ 300 total) in a CSV: `race_id, frame, saddle_no, tier_human`. |
 
 ## Measurements
@@ -26,7 +26,8 @@
 2. **Tier agreement**: `tripstate.m4_geometry.cluster_tiers` output vs `tier_human` on the labelled frames, per race and pooled. → KG-2.
 3. **`chartable` yield**: apply `tripstate.m7_qc.evaluate_gates` with the OD-1x-instantiated thresholds to each race. Report per stratum. → KG-3, first D-35 numbers.
 4. **Anchor residuals** again on 5 more races → tightens KG-4.
-5. **Candidate load**: if any break heuristic is tried, count candidates per race. Informative only.
+5. **Candidate load**: run `tripstate.m6_events.break_candidates` (uncalibrated) and count candidates per race against the hand-noted breaks. Informative only.
+6. **Tracker quality**: HOTA/IDF1 of the pre-correction tracks against the operator-corrected result, for both the seeded-propagation path and the detector+BoT-SORT path (research 07, RP-12); frames/s with 14 objects (R-15).
 
 ## Output
 

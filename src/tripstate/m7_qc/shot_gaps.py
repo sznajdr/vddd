@@ -50,11 +50,15 @@ def shot_gap_events(shots: list[Shot], t0: float, tend: float, configured: str =
 
 def coverage_fractions(coherent: list[tuple[float, float]], t0: float, tend: float) -> tuple[float, float]:
     """coverage_race and coverage_final_third from pack-coherent intervals (video seconds). Durations, not frames."""
+    merged: list[tuple[float, float]] = []
+    for a, b in sorted((a, b) for a, b in coherent if b > a):
+        if merged and a <= merged[-1][1]:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], b))
+        else:
+            merged.append((a, b))
+
     def covered_len(lo: float, hi: float) -> float:
-        tot = 0.0
-        for a, b in coherent:
-            tot += max(0.0, min(b, hi) - max(a, lo))
-        return tot
+        return sum(max(0.0, min(b, hi) - max(a, lo)) for a, b in merged)
     race = covered_len(t0, tend) / (tend - t0)
     ft0 = t0 + 2.0 * (tend - t0) / 3.0
     final = covered_len(ft0, tend) / (tend - ft0)

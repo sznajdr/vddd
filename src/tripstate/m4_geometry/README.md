@@ -1,6 +1,6 @@
 # M4 — Pack-Space Geometry
 
-**Spec:** §2.2, §3, EC-13; 2.0.0 ledger L-10, L-11; D-26. **Status:** tiering + cover implemented as reference functions and tested; projection stubbed (needs M3 tracklets and OD-1x step 4 on lateral scale, RP-5).
+**Spec:** §2.2, §3, EC-13; 2.0.0 ledger L-10, L-11; D-26. **Status:** tiering, cover and principal-axis projection (`ShotProjector`: motion axis with PCA fallback, calibration-driven orientation, SL/SW normalisation, ranks, ties, clusters, rail attachment) implemented and tested on synthetic renders; pixel-space rail detection is supplied by the caller. Lateral scale remains evidence-gated (RP-5).
 
 | | |
 |---|---|

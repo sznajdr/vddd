@@ -19,7 +19,18 @@ A hand chart made against a definition that then changes is wasted owner time (D
 - Record selection strata, assignment seed, source hashes.
 - The 5 pilot races and the 3 OD-1x races may be **dev** races but never held-out.
 
-## Chart template
+## Charting in BORIS (RP-17; recommended)
+
+Ethogram (one key each):
+- **Subjects:** `1`…`14` (saddle numbers) and `camera`.
+- **Point events:** `T0`, `TEND` (anchors; any subject), `BREAK` (modifiers `recovered` | `not_recovered` | `unknown`).
+- **State events (base):** `LEADER`, `POCKET`, `RAIL_COVERED`, `RAIL_UNCOVERED`, `OUTSIDE_COVERED`, `PARKED` (modifiers `lead` | `lead_ambiguous`), `WIDE` (modifiers `tier:3`/`tier:4`… and `covered` | `uncovered`), `NOT_VISIBLE`, `UNKNOWN`.
+- **State events (overlay):** `DETACHED` (modifier `front` | `rear`), `BREAKING`.
+- **State event on `camera`:** `SHOT_GAP` (modifier = shot types in order, e.g. `head_on,tight`).
+
+Export "aggregated events" (TSV) and convert: `python tools/boris_to_hand_charts.py export.tsv --race <race_id> --split dev --minutes <charter_minutes> --out data/golden/hand_charts/<race_id>.json`. The converter rejects overlapping base states and uncharted time outside a `SHOT_GAP`.
+
+## Chart template (manual alternative)
 
 `chart_template.csv` columns: `race_id, saddle_no, t_start_frac, t_end_frac, state_kind, state, covered, lead_uncovered_outside, lead_uncovered_outside_ambiguous, tier_attr, end_attr, visibility, start_truncated, end_truncated, notes`.
 

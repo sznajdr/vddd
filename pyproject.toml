@@ -7,11 +7,14 @@ name = "tripstate"
 version = "0.0.1"
 description = "Vincennes attelé trip-state extraction pipeline (SPEC-2.0.0-draft)"
 requires-python = ">=3.11"
-dependencies = ["pyyaml>=6"]
+dependencies = ["pyyaml>=6", "numpy>=1.26"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.5"]
 cv = ["opencv-python", "numpy", "ultralytics", "scenedetect", "pandas", "pyarrow"]
+
+[project.scripts]
+tripstate = "tripstate.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
