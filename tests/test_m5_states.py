@@ -44,11 +44,12 @@ def test_low_conf_overlay(ts):
     assert rs[0].state == "LEADER" and rs[0].low_conf is True
 
 
-def test_d26_table_gap_is_flagged_not_guessed(ts):
+def test_rp11_rail_leader_keeps_independent_cover_attribute(ts):
     # Tier-1 front runner with an outside runner 1 SL ahead and only 0.5 SW out -> covered under D-26.
     rs = classify_frame([g(1, 1.0, 0.0, 1), g(2, 2.0, 0.5, 2)], ts)
     by = {r.saddle_no: r for r in rs}
-    assert by[1].state == "UNKNOWN" and by[1].reason == "table_gap_tier1_lead_covered"
+    assert by[1].state == "LEADER" and by[1].covered is True and by[1].reason == ""
+    assert by[1].lead_uncovered_outside is False
 
 
 def test_exact_tie_is_unknown_not_tiebreak(ts):

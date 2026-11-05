@@ -152,3 +152,19 @@ entries:
     value: null
     evidence: null
     date: null
+  - key: normalized_fps
+    provisional: 25.0
+    instrument: "sheet_race.csv: native fps of the three replays (ffprobe); the draft marks M0's normalized_fps [EG: OD-1x]"
+    rule: "the replays' common native fps (expected 25, PAL broadcast); replays with differing fps -> owner decision before the freeze, key stays un-instantiated"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null
+  - key: sw_ratio
+    provisional: 0.35
+    instrument: "sheet_geometry.csv through sw_ratio_location_variation (RP-5); TS-0.0.0 flags sw_ratio eg: true"
+    rule: "confirmed at the provisional value iff sw_ratio_location_variation <= 2.0; otherwise per-shot sw_ratio_method (owner decision, additional MAJOR justification) and this key stays un-instantiated"
+    instantiated: false
+    value: null
+    evidence: null
+    date: null

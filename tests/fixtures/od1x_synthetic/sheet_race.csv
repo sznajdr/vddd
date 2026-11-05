@@ -1,0 +1,4 @@
+race_id,date,meeting,race_no,start_format,start_type,piste,field_size,day_night,replay_source,resolution,fps,notes
+SYN-AUTO,2026-11-01,R1,4,autostart,autostart,GP,14,night,synthetic,1920x1080,25,synthetic fixture (not evidence)
+SYN-VFLAT,2026-11-02,R1,2,volte_flat,volte,PP,12,day,synthetic,1920x1080,25,synthetic fixture (not evidence)
+SYN-VHCP,2026-11-03,R1,6,volte_handicap,volte,GP,13,night,synthetic,1920x1080,25,synthetic fixture (not evidence)

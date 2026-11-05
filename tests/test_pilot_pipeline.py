@@ -112,6 +112,7 @@ def test_seeded_path_flags_and_chart(synth, ts):
     assert 6 in nv and 4 not in nv                                      # EC-08: 0.8 s coasted (LOW_CONF), 2.0 s -> NOT_VISIBLE
     assert any(r["state"] == "LOW_CONF" and r["saddle_no"] == 4 for r in rep.segments)
     assert rep.producer_kind == "pilot_throwaway"
+    assert len(rep.id_assignments) == len(seeds) and {r["seed_box_ref"] for r in rep.id_assignments} == {f"mask:{s.saddle_no}@5" for s in seeds}   # RP-18
 
 
 def test_detector_path_report_with_tier_labels(synth, ts, tmp_path):
@@ -124,8 +125,9 @@ def test_detector_path_report_with_tier_labels(synth, ts, tmp_path):
                          path="detector", detector=OracleDetector(tb, seed=2), rail={int(k): tuple(v) for k, v in truth["rail"].items()},
                          tend_s=race.tend, tier_labels=labels, human_minutes=4.0)
     assert rep.tier_agreement is not None and rep.tier_agreement > 0.9 and rep.tier_agreement_n > 50
+    assert len(rep.id_assignments) == len(saddles) and all(r["seed_box_ref"].startswith("track:") and r["seed_frame"] == 5 for r in rep.id_assignments)   # RP-18
     p = rep.write(tmp_path)
-    assert json.loads(p.read_text())["path"] == "detector"
+    assert json.loads(p.read_text())["path"] == "detector" and json.loads(p.read_text())["id_assignments"][0]["seed_x_px"] > 0
 
 
 def test_aggregate_and_kill_gates(tmp_path):
@@ -146,3 +148,18 @@ def test_aggregate_and_kill_gates(tmp_path):
     assert (ROOT / "spec/registers/kill_gates.yaml").read_text() == repo_before   # repo file untouched
     md = markdown(agg, st)
     assert "KG-3 | 0.5" in md
+    # A caller-supplied registry must control every numeric cutoff, including write-back.
+    import yaml
+    custom = yaml.safe_load(repo_before)
+    for gate in custom["gates"]:
+        if gate["id"] == "KG-1":
+            gate["threshold_min"] = 4.0
+        elif gate["id"] in ("KG-2", "KG-3"):
+            gate["threshold"] = 0.95
+        elif gate["id"] == "KG-4":
+            gate["threshold_factor"] = 0.1
+    assert evaluate_kill_gates(agg, custom) == {
+        "KG-1": "fail", "KG-2": "recalibrate_once", "KG-3": "fail", "KG-4": "fail",
+    }
+    kg.write_text(yaml.safe_dump(custom), encoding="utf-8")
+    assert write_kill_gates(kg, agg, "custom gate regression")["KG-1"] == "fail"

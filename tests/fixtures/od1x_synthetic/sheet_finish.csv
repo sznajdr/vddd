@@ -1,0 +1,4 @@
+race_id,finish_shot_type,n_crossings_observed,n_identifiable,order_unambiguous,coverage_before_first_crossing_s,notes
+SYN-AUTO,wide_pan,6,5,1,4.0,
+SYN-VFLAT,head_on,4,3,1,2.5,
+SYN-VHCP,wide_pan,7,6,1,5.0,

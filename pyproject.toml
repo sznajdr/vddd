@@ -10,7 +10,7 @@ requires-python = ">=3.11"
 dependencies = ["pyyaml>=6", "numpy>=1.26"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ruff>=0.5"]
+dev = ["pytest>=8", "ruff>=0.5", "hypothesis>=6"]
 cv = ["opencv-python", "numpy", "ultralytics", "scenedetect", "pandas", "pyarrow"]
 
 [project.scripts]
@@ -26,3 +26,10 @@ pythonpath = ["src"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+
+[tool.ruff.lint]
+# Preserve the existing compact mathematical/reference-code style. Tools bootstrap src on sys.path.
+ignore = ["E702", "E741", "E743"]
+
+[tool.ruff.lint.per-file-ignores]
+"tools/*.py" = ["E402"]

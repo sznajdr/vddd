@@ -134,3 +134,17 @@ Legend: **now** = evidence-independent, lands verbatim. **EG** = structure lands
 | 2.0.0 | _at freeze_ | _Template:_ EG registry instantiated from OD-1x sheets vN; kill-gates pass; D-26…D-36 appended; markers stripped; headline evaluation not yet run (first held-out evaluation appends its own entry). |
 
 *End of SPEC-2.0.0-draft (ledger form).*
+
+
+## Delegated decisions applied (2026-11-04)
+
+The owner authorized resolving the design queue so implementation can continue. These edits settle design choices; they do not instantiate evidence or promote the draft. See `docs/decisions/2026-11-04-continuation.md`.
+
+| ID | Edit | Basis | Gate |
+|---|---|---|---|
+| L-46 | RP-11: tier-1 front runner remains LEADER with independent cover; update table, invariant, code and fixture. Supersedes L-12 gap note. | D-26 cover is independent of tier and leadership | now |
+| L-47 | Accept opt-in rail axis, projective lateral coordinate, local bend datum and foot correction; retain measured-input requirement and EC-13 abstention. Resolve geometry and rail_fence open markers. Supersedes L-11b proposal wording. | RP-19…RP-25 simulator findings; real evidence still absent | now / EG width |
+| L-48 | Remove stratum_yield_review_factor EG markers and TS flag; this is review policy, not a measured physical quantity. Supersedes L-31 EG-trigger note. | D-18, D-35 | now |
+| L-49 | Replace numeric operator-loop heading with target/cap key references so promotion cannot leave it stale. | D-29 | now |
+| L-50 | Accept SAM 2 seeded default, detector comparison, TransNetV2/CLIP stack, BORIS and descriptive continuity metrics. Approve RP-18 next schema task; retain saddle 0 for SHOT_GAP and human version columns as implemented. | RP-12…RP-18; D-01, D-05, D-15 | now (design); adapters/schema remain backlog |
+| L-51 | RP-18 schema task delivered: `id_assignments` gains additive `seed_x_px`, `seed_y_px`, `seed_box_ref` (the operator's click in source-frame pixels and the box/mask it hit — identity provenance for future re-ID training, never a state coordinate); DDL, writers (`tripstate.m3_track.assignments`), additive migration (`Store.migrate_additive`) and canonical/coexistence tests land together. Additive within the draft (§14: new columns = minor). | RP-18, L-50; D-01, D-13 | now |

@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS id_assignments (
   saddle_no INTEGER NOT NULL,
   method TEXT NOT NULL CHECK (method IN ('human_seed','propagation','human_correction')),
   human_confirmed INTEGER NOT NULL, seed_frame INTEGER, seed_video_s REAL,
+  seed_x_px REAL, seed_y_px REAL, seed_box_ref TEXT,               -- RP-18 (L-51): the click in source-frame pixels + the box/mask it hit; identity provenance, never a state coordinate
   extractor_version TEXT NOT NULL, threshold_set_version TEXT NOT NULL,
   schema_version TEXT NOT NULL, producer_version TEXT NOT NULL, created_at TEXT NOT NULL,
   PRIMARY KEY (race_id, shot_id, tracklet_id, producer_version)

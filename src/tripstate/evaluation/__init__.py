@@ -17,10 +17,19 @@ from tripstate.evaluation.metrics import (
     segment_iou,
     wilson_ci,
 )
+from tripstate.evaluation.scoring import (
+    RaceScore,
+    SetScore,
+    observability_mask,
+    score_race,
+    score_set,
+)
 
 __all__ = [
     "REST_STATES",
     "AuditPlan",
+    "RaceScore",
+    "SetScore",
     "audit_seed",
     "break_candidate_recall",
     "edit_score",
@@ -28,9 +37,12 @@ __all__ = [
     "headline_score",
     "macro_iou",
     "mask_iou",
+    "observability_mask",
     "pass_probability",
     "plan_audit",
     "score_audit",
+    "score_race",
+    "score_set",
     "segment_iou",
     "wilson_ci",
 ]

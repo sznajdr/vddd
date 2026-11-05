@@ -17,6 +17,7 @@ from tripstate.evaluation.metrics import (
     mask_iou,
     per_runner_state_iou,
 )
+from tripstate.m3_track.assignments import id_assignment_rows, rows_from_pilot
 from tripstate.m3_track.checks import anchor_check
 from tripstate.m4_geometry import Box, ShotCalibration, ShotProjector, to_frame_geoms
 from tripstate.m5_states import chart_race
@@ -56,6 +57,7 @@ class PilotRaceReport:
     seeding_seconds_initial: float | None = None
     chart_vs_truth: dict = field(default_factory=dict)
     segments: list[dict] = field(default_factory=list)
+    id_assignments: list[dict] = field(default_factory=list)   # RP-18 rows (seed click provenance); shot_id 0 = the pilot's single charted interval set
 
     def write(self, out_dir: Path) -> Path:
         out_dir = Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)
@@ -132,6 +134,7 @@ def run_pilot_race(
             tracker.update(f, detector.detect(f, img))
         assignment, aflags = assign_seeds_to_tracks(tracker.tracks, seeds)
         timeline = identity_timeline(tracker.tracks, assignment, n_frames, max_gap)
+        rep.id_assignments = rows_from_pilot(race_id, 0, seeds, assignment, tracker.tracks, fps)
         rep.flags = sorted(aflags + reseed_flags(tracker.tracks, assignment, saddles, n_frames, fps), key=lambda x: (x["frame"], x["kind"]))
     elif path == "seeded":
         assert propagator is not None
@@ -150,6 +153,7 @@ def run_pilot_race(
         prompt_frames: dict[int, int] = {}
         for sd in seeds:
             prompt_frames[sd.saddle_no] = min(prompt_frames.get(sd.saddle_no, sd.frame), sd.frame)
+        rep.id_assignments = id_assignment_rows(race_id, 0, seeds, lambda s: int(s["saddle_no"]), fps, ref_kind="mask")
         rep.flags = propagation_flags(prop, sorted(prompt_frames), n_frames, float(ts["mask_conf_flag"]),
                                       float(ts["mask_overlap_flag"]), round(float(ts["overlap_flag_s"]) * fps), prompt_frames)
     else:

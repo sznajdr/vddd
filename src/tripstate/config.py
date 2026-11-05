@@ -15,7 +15,8 @@ import yaml
 
 _NAMESPACES = (
     "geometry", "smoothing", "confidence", "events", "anchors", "ingest",
-    "phases", "qc", "yield", "m1_shots", "m2_detect", "m3_track", "m6_events",
+    "phases", "qc", "yield", "release", "calibration",
+    "m1_shots", "m2_detect", "m3_track", "m6_events",
 )
 
 
@@ -34,6 +35,8 @@ class ThresholdSet:
     spec_version: str
     calibrated: bool
     thresholds: dict[str, Threshold] = field(default_factory=dict)
+    search_provenance: Any = None   # §7.2 step 3 / §9 threshold_sets: dict for a calibrated set, "freeze" for TS-x.y.z-frozen
+    path: Path | None = None
 
     @classmethod
     def load(cls, path: str | Path) -> ThresholdSet:
@@ -42,6 +45,8 @@ class ThresholdSet:
             version=raw["threshold_set_version"],
             spec_version=raw["spec_version"],
             calibrated=bool(raw.get("calibrated", False)),
+            search_provenance=raw.get("search_provenance"),
+            path=Path(path),
         )
         for ns in _NAMESPACES:
             for key, spec in (raw.get(ns) or {}).items():
@@ -70,7 +75,16 @@ class ThresholdSet:
 
 
 def default_threshold_path() -> Path:
-    return Path(__file__).resolve().parents[2] / "config" / "thresholds" / "TS-0.0.0-provisional.yaml"
+    """TS-0.0.0-provisional while the spec is DRAFT; once promoted (D-36) the frozen set written by
+    tools/promote_draft.py (`TS-<spec>-frozen.yaml`) becomes the default when it exists."""
+    from tripstate.version import SPEC_STATUS, SPEC_VERSION
+
+    d = Path(__file__).resolve().parents[2] / "config" / "thresholds"
+    if SPEC_STATUS == "FROZEN":
+        frozen = d / f"TS-{SPEC_VERSION}-frozen.yaml"
+        if frozen.exists():
+            return frozen
+    return d / "TS-0.0.0-provisional.yaml"
 
 
 def load_default() -> ThresholdSet:

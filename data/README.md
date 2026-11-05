@@ -11,6 +11,10 @@ data/
   golden/hand_charts/                 hand charts (OD-3) — only after freeze
   store/tripstate.sqlite              M8 relational store
   store/sidecars/                     parquet frame-level series
+  frames/<race_id>.frames.json        per-race M4 frame record (tripstate.m4.frames/1) written by a pipeline run; input of tools/export_calibration_inputs.py
+  calibration/<race_id>.geometry.json   M4 geometry sidecar per dev/held-out race (tripstate.calibration.sidecar)
+  calibration/<race_id>.hand_chart.json hand-chart rows per race (input to tools/calibrate.py)
+  releases/<version>/evaluation.md    DoD-1…6 release evaluation (tools/evaluate_release.py) + evaluation.json + changelog-row.md
 ```
 
 `race_id` convention: `YYYYMMDD-R<meeting>-C<race>` plus official ID when known, e.g. `20261103-R1-C4`.

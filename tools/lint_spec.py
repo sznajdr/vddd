@@ -44,9 +44,10 @@ def check_decision_refs(text: str, name: str) -> list[str]:
 
 
 def check_eg_keys(eg_path: Path) -> list[str]:
+    """Registry keys must be flagged eg: true in the PROVISIONAL set (the frozen set clears the flags by design)."""
     sys.path.insert(0, str(ROOT / "src"))
-    from tripstate.config import load_default
-    ts = load_default()
+    from tripstate.config import ThresholdSet
+    ts = ThresholdSet.load(ROOT / "config" / "thresholds" / "TS-0.0.0-provisional.yaml")
     eg = yaml.safe_load(eg_path.read_text(encoding="utf-8"))
     errs = []
     for e in eg["entries"]:
@@ -56,13 +57,22 @@ def check_eg_keys(eg_path: Path) -> list[str]:
     return errs
 
 
+def check_frozen_markers(text: str, name: str) -> list[str]:
+    """A FROZEN spec carries no evidence-gated or open-decision markers (D-36)."""
+    if not re.search(r"^\*\*Status:\*\* FROZEN", text, re.MULTILINE):
+        return []
+    return [f"{name}:{i}: FROZEN spec still carries a marker: {line.strip()[:80]}"
+            for i, line in enumerate(text.splitlines(), 1) if "`[EG" in line or "`[OPEN" in line]
+
+
 def main(argv: list[str]) -> int:
     if len(argv) != 3:
         print(__doc__)
         return 2
     spec, eg = Path(argv[1]), Path(argv[2])
     text = spec.read_text(encoding="utf-8")
-    errs = check_tables(text, spec.name) + check_decision_refs(text, spec.name) + check_eg_keys(eg)
+    errs = (check_tables(text, spec.name) + check_decision_refs(text, spec.name) + check_eg_keys(eg)
+            + check_frozen_markers(text, spec.name))
     for e in errs:
         print(e)
     print("lint-spec:", "OK" if not errs else f"{len(errs)} problem(s)")

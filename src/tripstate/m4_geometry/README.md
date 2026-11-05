@@ -10,3 +10,5 @@
 | DoD | Degenerate frames → `conf = 0`; near-ties → `order_ambiguous`; **cluster span ≤ `max_tier_span_sw` (unit test, 14 evenly spread runners)**. |
 
 Gate: G-2 (M3 produces ID-assigned tracklets on ≥ 3 dev races within budget). The throwaway pilot is exempt (RP-2).
+
+`frames_to_json` / `frames_from_json` (C8): the explicit per-race frame record (`tripstate.m4.frames/1`, every `RunnerGeometry` field per frame plus box heights) that `tools/export_calibration_inputs.py` turns into calibration sidecars.

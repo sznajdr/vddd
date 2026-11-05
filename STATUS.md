@@ -1,10 +1,10 @@
 # STATUS — live board
 
-_Last updated: 2026-11-04 (agent scaffold, research pack, P1 draft cut)._ Update this file whenever a phase gate moves.
+_Last updated: 2026-11-04 (delegated decisions resolved; code and continuation handoff cleaned)._ Update this file whenever a phase gate moves.
 
 ## Phase
 
-**P1 complete: `spec/SPEC-2.0.0-draft.md` is the full prose draft** (cut from 1.2.0 by `tools/cut_draft.py`, 63 edits; the ledger stays as `SPEC-2.0.0-draft-LEDGER.md`). **Next: P2 (OD-1x) and P3 (signal gate)**, both owner-side. P4's throwaway pilot stack exists and runs end to end on synthetic video; on real replays it needs the model adapters (Grounding DINO / OWLv2 / YOLO, SAM 2) run once and the seeding window exercised with a display.
+**P1 complete: `spec/SPEC-2.0.0-draft.md` is the full prose draft** (cut from 1.2.0 by `tools/cut_draft.py` plus ledger L-46…L-50; the ledger stays as `SPEC-2.0.0-draft-LEDGER.md`). **Next: P2 (OD-1x) and P3 (signal gate)**, both owner-side. P4's throwaway pilot stack exists and runs end to end on synthetic video; on real replays it needs the model adapters (Grounding DINO / OWLv2 / YOLO, SAM 2) run once and the seeding window exercised with a display. **The freeze → calibration → release path is now tooled and rehearsed on synthetic fixtures** (`tools/promote_draft.py`, `tools/calibrate.py`, `tools/evaluate_release.py`; `make freeze-dry-run calibrate-dry-run evaluate-dry-run`). None of it has run for real: `freeze_check` still blocks on 19 EG entries, 4 kill-gates, zero unbound markers and zero open design decisions. Hygiene: `make check` = ruff + both spec lints + `tools/lint_docs.py` (every named path exists, every tool and package is indexed, every `make` target exists) + the test suite.
 
 ## Facts established
 
@@ -14,21 +14,23 @@ _Last updated: 2026-11-04 (agent scaffold, research pack, P1 draft cut)._ Update
 - No replays are in hand; replay source and rights unverified.
 - Notule corpus and NLP artifacts referenced by §11 live outside this repo (owner's machine).
 
-## Open questions for the owner
+## Continue now
 
-1. Has OD-1x, or any replay pull, happened since July 2026?
-2. Where do the replays and the notule corpus live? Paths or a mount are needed for `data/`.
-3. The signal gate is runnable: point `tools/signal_gate.py --corpus` at a runner-race CSV with closing odds and notules (see `protocols/SIGNAL-GATE`). Needs your corpus.
-4. Do LeTrot's "Tracking" pages (per-runner tracking data at Vincennes) expose anything usable? If per-runner positional data exists officially, large parts of the CV plan are replaceable. Decide before P4.
-4. Replay rights: Equidia terms were not read to completion. Confirm personal-use replay access is acceptable for the intended use.
+The owner delegated the design queue. Decisions are settled in `docs/decisions/2026-11-04-continuation.md` and applied through ledger L-46…L-50. D1 is complete. **The whole continuation queue is done**: C6, C8, C3, C7 (`make od1x-rehearsal`, `tools/export_calibration_inputs.py`, `tools/env_fingerprint.py`, `protocols/OPERATOR/`), the RP-18 schema task (L-51: `seed_x_px`, `seed_y_px`, `seed_box_ref` with writers, additive migration and tests) and D2 (property-based invariant tests, which found and fixed a §9 payload defect in M5). Remaining backlog: B4/B5 adapters, C1/C2/C4/C5/C9, D3/D4.
 
-## Blockers
+## Remaining external inputs
 
-| Blocker | Blocks | Owner |
-|---|---|---|
-| OD-1x not run | P5 freeze, every EG value | owner |
-| Replays not sourced | P2, P4 | owner |
-| Signal gate not run | go/no-go on the whole project | owner |
+Replay paths and the notule corpus are not in this checkout. OD-1x, the real signal gate and the pilot still need those inputs and human observations. Official-tracking discovery is optional parallel work, not a reason to stop independent coding.
+
+## Freeze blockers (evidence only)
+
+| Blocker | Blocks |
+|---|---|
+| 19 uninstantiated OD-1x/pilot registry entries | P5 freeze |
+| KG-1…KG-4 not evaluated | P5 freeze |
+| Real signal gate / corpus not supplied (KG-5) | Project go/no-go before P4 |
+
+All 20 remaining draft markers bind to the registry or kill-gates. No unresolved policy marker or OPEN decision remains. SPEC_STATUS is still DRAFT; synthetic results do not authorize a real freeze.
 
 ## Done
 
@@ -56,19 +58,21 @@ _Last updated: 2026-11-04 (agent scaffold, research pack, P1 draft cut)._ Update
 - [x] Signal gate (`tripstate.signal`): prior-race indicators with leakage guard, numpy logistic regression vs market baseline, holdout + bootstrap CI + fold stability, pre-registered `decision.yaml`; `tools/signal_gate.py` (synthetic dry run and real corpus, KG-5 update)
 - [x] World-space simulator (`tripstate.synth.track/camera/world`): stadium track in metres, pinhole grandstand camera, 3-D vehicle boxes; `tools/geometry_study.py` → `docs/research/11-simulated-geometry.md`; projector gains `axis_source = rail`, `lateral_scale_mode = rail_fence_projective` with polyline datum and foot-point correction (RP-19…RP-25)
 - [x] Live seeding loop (`tripstate.seeding.live`): oracle / detector / SAM 2 engines, `FlagMonitor`, pause-on-flag, re-seed prompts, session timeline → `pilot_run.py --propagator session`
+- [x] **A5** `tools/promote_draft.py` + `tripstate.release` (freeze check with `[EG]` marker binding, OD-1x/pilot instantiation, promotion: FROZEN header + freeze record, D-26…D-36 into §1, markers → frozen values, changelog row, `TS-2.0.0-frozen.yaml`, decision log Pending → Closed, `version.py` bump; dry run with diffs; real run rehearsed on an isolated repo copy, idempotent). Registry entries added for `normalized_fps` and `sw_ratio`; `instantiate_eg.py` fills them and the D-29 pilot keys (`--pilot-reports`)
+- [x] **A4** `tripstate.calibration` + `tools/calibrate.py` (geometry sidecars with pack-space re-derivation, grid search on dev charts with the §6.2 headline and config constraints, provenance-carrying TS writer, one-shot held-out with the > 10 pt rule; `--synthetic` recovers mis-set `cover_lat_sw` / `same_tier_sw` exactly; real run refused while DRAFT). DoD floors and §7.2 constraints now live in TS namespaces `release` / `calibration` (D-18)
+- [x] **B6** `tools/evaluate_release.py` + `tripstate.release.evaluate` (DoD-1…6 with pass/fail/invalid reasons, Wilson CI, dual headline with/without Q-7, per-stratum yield and headline, `data/releases/<version>/evaluation.md` + changelog row; `--synthetic` store, two runs for DoD-5)
+- [x] **C6** `make od1x-rehearsal` (`tools/od1x_rehearsal.py`): synthetic clip, clean sheet templates, scripted stopwatch row marked REHEARSAL (`od1x_timer.py --script`, refuses non-`SYNTH-` race ids), instantiation proposals checked against `tests/fixtures/od1x_synthetic/expected_proposals.json`
+- [x] **C8** `tools/export_calibration_inputs.py`: M4 frame JSON (`tripstate.m4.frames/1`, `frames_to_json`/`frames_from_json`) + store + manifest → `data/calibration/<race_id>.geometry.json` + `.hand_chart.json`; refuses missing inputs, S-6 split mismatches, ambiguous human producers (all or nothing); synthetic round trip into `tools/calibrate.py`
+- [x] **C3** `tools/env_fingerprint.py` + `tripstate.m8_storage.determinism`: `versions.determinism_env` with actual versions (python/numpy/opencv/ffmpeg, torch/CUDA/cuDNN/GPU and the D-32 flags when torch is importable), seed / half-precision / batch size / weight SHA-256 as given; null for anything absent; stable output; `versions` row insert
+- [x] **C7** `protocols/OPERATOR/`: keymap card (tested against `SeedingSession.KEYMAP`), ten-minute walkthrough on the synthetic clip, EC-04 anchor prompts per start type (tested against `start_prompt()`)
+- [x] **RP-18 / L-51** `id_assignments.seed_x_px/seed_y_px/seed_box_ref`: DDL, `tripstate.m3_track.assignments` writers (session and pilot paths, wired into `PilotRaceReport.id_assignments`), `Store.migrate_additive()` for existing stores (refuses breaking columns), canonical export + producer coexistence tests; §9 row updated by ledger L-51
+- [x] **D2** `tests/test_invariants_property.py` (hypothesis): base-segment partition of charted time, overlays inside visible base time, half-open adjacency, at most one `lead_uncovered_outside` per instant, §9 payload NULLs on abstention states, canonical export invariant under row shuffling, marker binding invariant under non-marker edits. Found M5 emitting `covered = false` on `UNKNOWN` rows (fixed)
 - [x] Throwaway pilot stack (`tripstate.pilot`): ffmpeg frame source, synthetic video renderer, oracle + blob detectors, IoU tracker, seed→track assignment with flags, oracle + SAM 2 propagators, IDF1/IDSW/MOTA-lite, race runner → report, kill-gate aggregation; `tools/synth_video.py`, `pilot_run.py`, `pilot_report.py`; `make pilot-demo` runs the loop on synthetic video
 
 ## Research pack (2026-11-04)
 
-`docs/research/00-INDEX.md` — 13 findings mapped to modules and decisions; proposals RP-12…RP-20 in the patch list; proposed §13 stack in `docs/STACK-2.0.md`. Access/rights questions (replays, official tracking) are out of scope by owner decision.
+`docs/research/00-INDEX.md` — 13 findings mapped to modules and decisions; proposals RP-12…RP-20 in the patch list; accepted stack direction in `docs/STACK-2.0.md`. Access/rights questions (replays, official tracking) are out of scope by owner decision.
 
-## Owner decisions pending (see `spec/RECON-2.0.0-patches.md`)
+## Decisions applied
 
-- RP-5 lateral scale: per-shot `sw_ratio` if OD-1x shows > 2× variation.
-- RP-6 LeTrot tracking data: read the pages before P4.
-- RP-11 D-26 table gap: tier-1 leader covered by an outside runner. Recommended: keep `LEADER`, record `covered = true`.
-- RP-12 seeded SAM 2 propagation as the M3 default (biggest design consequence of the research).
-- RP-14 / RP-15 / RP-17 stack and metric additions (low risk, recommended).
-- RP-19 / RP-20 geometry aids (only if OD-1x step 4 shows the lateral problem).
-- RP-21 axis-accuracy requirement (≈ 1° on a 5 SL pack): already applied as §3.1 text L-10b and code; confirm.
-- **RP-19 (refined) / RP-22 / RP-23 / RP-24 / RP-25** from the simulator: adopt the rail-line axis and the projective lateral coordinate (needs a §3.3 carve-out), decide how to handle sections without lateral resolvability. These are the largest open design questions in M4 now.
+See `docs/decisions/2026-11-04-continuation.md`: LEADER precedence with independent cover, ordinary stratum-review policy, optional rail/projective geometry, accepted SAM 2/TransNetV2/CLIP/BORIS stack direction, approved next seed-provenance schema task, retained event sentinel and human chart versions. Geometry default changes and additional QC/SL rules require measurements; their deferral does not block the coding queue.

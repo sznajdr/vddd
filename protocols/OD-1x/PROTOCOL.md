@@ -56,6 +56,10 @@ Per race: in the finish shot(s), count how many runners you can see **crossing t
 
 Note any aborted start, what it looked like (deceleration, turn-back, restart footage, commentary cue), and whether the broadcast showed the restart. Record in `sheet_recall.csv`. Even "none observed" is a row.
 
+## The evening before
+
+`make od1x-rehearsal` regenerates a synthetic clip, the clean sheet templates, a scripted stopwatch row (marked REHEARSAL) and the instantiation proposals in `/tmp/tripstate-od1x-rehearsal`, and checks them against the committed fixture. `protocols/OPERATOR/` has the keymap card, the seeding walkthrough and the anchor prompts per start type.
+
 ## After the afternoon
 
 ```bash

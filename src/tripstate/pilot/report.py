@@ -6,6 +6,10 @@ from pathlib import Path
 
 import yaml
 
+from tripstate.config import load_default
+
+GATES_PATH = Path(__file__).resolve().parents[3] / "spec/registers/kill_gates.yaml"
+
 
 def aggregate(reports: list[dict], seeding_minutes: list[float] | None = None, anchor_residuals: dict[str, list[float]] | None = None,
               provisional_tol: dict[str, float] | None = None) -> dict:
@@ -21,7 +25,9 @@ def aggregate(reports: list[dict], seeding_minutes: list[float] | None = None, a
         if len(res) >= 2:
             off = st.median(res)
             spread = max(abs(x - off) for x in res)
-            tol = (provisional_tol or {}).get(stype, 2.0)
+            tolerances = provisional_tol or {}
+            key = "autostart" if stype == "autostart" else "volte"
+            tol = tolerances[stype] if stype in tolerances else float(load_default()[f"anchor_tol_{key}_s"])
             kg4[stype] = {"spread": spread, "tolerance": tol, "ratio": spread / tol if tol else None}
     out["KG-4"] = {"measured": max((v["ratio"] for v in kg4.values()), default=None), "by_start_type": kg4}
     hm = [r["human_minutes"] for r in reports if r.get("human_minutes") is not None]
@@ -33,18 +39,21 @@ def aggregate(reports: list[dict], seeding_minutes: list[float] | None = None, a
     return out
 
 
-def evaluate_kill_gates(agg: dict) -> dict[str, str]:
+def evaluate_kill_gates(agg: dict, registry: dict | None = None) -> dict[str, str]:
+    """SPEC-2.0.0-draft D-18: numeric gate rules come from the selected registry."""
+    reg = registry if registry is not None else yaml.safe_load(GATES_PATH.read_text(encoding="utf-8"))
+    gates = {g["id"]: g for g in reg["gates"]}
     status = {}
-    m1 = agg["KG-1"]["measured"]; status["KG-1"] = "not_evaluated" if m1 is None else ("fail" if m1 > 8 else "pass")
-    m2 = agg["KG-2"]["measured"]; status["KG-2"] = "not_evaluated" if m2 is None else ("recalibrate_once" if m2 < 0.85 else "pass")
-    m3 = agg["KG-3"]["measured"]; status["KG-3"] = "not_evaluated" if m3 is None else ("fail" if m3 < 0.40 else "pass")
-    m4 = agg["KG-4"]["measured"]; status["KG-4"] = "not_evaluated" if m4 is None else ("fail" if m4 > 2.0 else "pass")
+    m1 = agg["KG-1"]["measured"]; status["KG-1"] = "not_evaluated" if m1 is None else ("fail" if m1 > gates["KG-1"]["threshold_min"] else "pass")
+    m2 = agg["KG-2"]["measured"]; status["KG-2"] = "not_evaluated" if m2 is None else ("recalibrate_once" if m2 < gates["KG-2"]["threshold"] else "pass")
+    m3 = agg["KG-3"]["measured"]; status["KG-3"] = "not_evaluated" if m3 is None else ("fail" if m3 < gates["KG-3"]["threshold"] else "pass")
+    m4 = agg["KG-4"]["measured"]; status["KG-4"] = "not_evaluated" if m4 is None else ("fail" if m4 > gates["KG-4"]["threshold_factor"] else "pass")
     return status
 
 
 def write_kill_gates(path: Path, agg: dict, evidence: str) -> dict:
     reg = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
-    status = evaluate_kill_gates(agg)
+    status = evaluate_kill_gates(agg, reg)
     for g in reg["gates"]:
         if g["id"] in status and status[g["id"]] != "not_evaluated":
             g["status"] = status[g["id"]]

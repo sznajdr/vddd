@@ -1,4 +1,6 @@
-# Proposed §13 default stack for 2.0.0 (NON-NORMATIVE, D-15) — informed by `docs/research/`
+# Accepted direction for §13 default stack for 2.0.0 (NON-NORMATIVE, D-15) — informed by `docs/research/`
+
+Accepted design direction under owner delegation (2026-11-04); real adapters and hardware benchmarks are still backlog. `docs/decisions/2026-11-04-continuation.md` governs. Optional models listed below are candidates, not claims of installed or tested backends.
 
 Two columns because the throwaway pilot (RP-2) and production have different goals: the pilot must run in days with zero training; production must pass §4 acceptance.
 
@@ -10,7 +12,7 @@ Two columns because the throwaway pilot (RP-2) and production have different goa
 | Detection | Grounding DINO / OWLv2 prompt "horse pulling a sulky" (SAM 3 if GPU allows) | fine-tuned single-class detector (RF-DETR or YOLO family), Objects365-initialised, race-disjoint holdout | 01 |
 | Identity seeding + tracking | SAM 2 point-prompt propagation per runner (clicks = prompts); BoT-SORT+GMC on detections as comparison | same, with DAM4SAM/SAM2MOT-style memory management for 14 objects; McByte++ as alternative | 02 |
 | Appearance re-ID | none | flag source only (D-01): online embedding to raise swap flags | 02, 06 |
-| Pack geometry | `tripstate.m4_geometry` on mask-bbox centroids; PCA axis with human-confirmed sign | + rail-line direction prior for the axis; local-neighbourhood axis on bends (EG) | 05 |
+| Pack geometry | `tripstate.m4_geometry` on mask-bbox centroids; PCA axis with human-confirmed sign | + rail-line direction prior for the axis; local rail/fence polyline datum on bends; opt-in projective lateral scale (L-47) | 05 |
 | States | `tripstate.m5_states` (implemented) | same | — |
 | Breaks | none (hand-noted) | bbox-oscillation + rank-velocity (M6 as specified); v1.5: SuperAnimal-Quadruped pose gait | 04 |
 | QC / metrics | `tripstate.m7_qc`, `tripstate.evaluation` (implemented) | same + edit score / F1@k descriptive | 07 |

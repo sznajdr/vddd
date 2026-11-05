@@ -1,6 +1,6 @@
 # RECON-2.0.0 — patches
 
-**Status:** Informative. Defects and gaps found in `RECON-2.0.0.md` after it was written (second read, 2026-11-04). Each item is applied in the draft ledger (`SPEC-2.0.0-draft.md`) and cross-referenced there. Items marked **owner decision** need a verdict before the freeze.
+**Status:** Historical findings/proposals. Current verdicts: `docs/decisions/2026-11-04-continuation.md` (owner delegation, 2026-11-04); ledger L-46…L-50 applies the settled design. References below to pending owner approval describe the original discovery, not a current blocker. Informative. Defects and gaps found in `RECON-2.0.0.md` after it was written (second read, 2026-11-04). Each item is applied in the draft ledger (`SPEC-2.0.0-draft.md`) and cross-referenced there. Items marked **owner decision** need a verdict before the freeze.
 
 | ID | Finding | Patch | Where applied |
 |---|---|---|---|

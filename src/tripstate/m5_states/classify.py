@@ -116,11 +116,9 @@ def classify_frame(
             c = cov[s_]
             if tier_of[s_] == 1:
                 ahead = sum(1 for o in tier1 if pos[o] < pos[s_])
-                if ahead == 0 and not c:
+                if ahead == 0:
+                    # RP-11: rail leadership takes precedence; cover remains an independent attribute.
                     res[s_] = ("LEADER", "")
-                elif ahead == 0 and c:
-                    # Table gap under D-26 (RP-11): tier-1 front runner covered by an outside runner.
-                    res[s_] = ("UNKNOWN", "table_gap_tier1_lead_covered")
                 elif c and ahead == 1:
                     res[s_] = ("POCKET", "")
                 elif c:
@@ -157,9 +155,9 @@ def classify_frame(
         low = min_conf <= r.conf < ok_conf
         st, reason = base[s]
         if s in ambiguous:
-            out[s] = RunnerState(s, "UNKNOWN", c, None, None, None, low, "order_ambiguous")
+            out[s] = RunnerState(s, "UNKNOWN", None, None, None, None, low, "order_ambiguous")   # §9: covered is NULL on UNKNOWN
         elif st == "UNKNOWN":
-            out[s] = RunnerState(s, "UNKNOWN", c, None, None, None, low, reason)
+            out[s] = RunnerState(s, "UNKNOWN", None, None, None, None, low, reason)
         elif st == "PARKED":
             out[s] = RunnerState(s, "PARKED", False, None, None, None, low)
             parked.append(r)

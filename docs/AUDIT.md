@@ -25,8 +25,38 @@ Each entry: what was checked, what was wrong, what changed. Dates are when the f
 | 2026-11-04 | M4 centroid (RP-23) | `(mid-x, max-y)` carries ≈ 1 SW pan-dependent lateral bias; absolute tiers failed at the closed `rail_attach_sw` boundary. | Foot-point correction in projective mode. |
 | 2026-11-04 | Study metric | Undetected (out-of-frame) runners counted as tier failures. | Detected runners only; visibility is EC-02's business. |
 
-## Open items found by the audit (owner decisions)
+| 2026-11-04 | Registry × draft markers (A5) | The draft marks `normalized_fps` and `stratum_yield_review_factor` `[EG]` but the registry had no entries for them, and TS-0.0.0 flags `sw_ratio` `eg: true` without a registry entry — `freeze_check` could have passed with markers left in the spec (D-36 rule (1) unverifiable). | Registry entries added for `normalized_fps` (instrument: `sheet_race.csv` fps) and `sw_ratio` (confirmed iff `sw_ratio_location_variation` ≤ 2.0, RP-5); `instantiate_eg.py` fills both. `stratum_yield_review_factor` has no instrument → left unbound as an owner decision (below). `freeze_check` now binds every `[EG]` marker and lists unbound ones; `test_registries.py` whitelist shrunk to that one key. |
+| 2026-11-04 | lint_spec × frozen threshold set (A5) | `check_eg_keys` used `load_default()`, which after a promotion resolves to the frozen set (all `eg: false`), producing 17 false "not flagged eg" problems. Found by the real-run rehearsal on a repository copy. | Lint loads `TS-0.0.0-provisional.yaml` explicitly: the rule "registry keys are flagged eg in the provisional set" holds forever. Lint additionally rejects any `[EG`/`[OPEN` marker in a FROZEN file. |
+| 2026-11-04 | Numbers are config (A4/B6) | DoD floors (0.85, 0.80, 10 breaks, 5 min, 20 attempts, 8/10) and §7.2 constraints (mask floors, load cap, 10 pt gap) would have been hard-coded in the new tools. | New TS namespaces `release` and `calibration` (D-18); `dod3_median_target_min` is a TS key flagged `eg: true` (its registry entry already existed). |
+| 2026-11-04 | Synthetic calibration fixture | First layouts put two offsets exactly on a floating-point boundary (0.9 / 0.8 SW) and the held-out race was insensitive to wrong thresholds, so the > 10 pt gap rule could not fire. Found by the tests. | Margins ≥ 0.05 SW everywhere; the held-out race carries both discriminating mechanisms; the optimum is strict (every neighbour one grid step away scores lower). |
+| 2026-11-04 | Synthetic release store | The recall-miss condition could never produce more than two misses, so a failing DoD-2 was untestable. | Misses spend a budget across held-out races; `recall_misses=4` now fails DoD-2 and makes the second store's canonical events differ (DoD-5 fail path tested). |
+| 2026-11-04 | Handoff text | "Changelog row template already in the draft's changelog" — the template is in the ledger (`SPEC-2.0.0-draft-LEDGER.md` row `2.0.0 | _at freeze_`), not in the draft. | `promote.changelog_row` follows the ledger template; no draft edit needed. |
+| 2026-11-04 | pilot/report.py × D-18 | `evaluate_kill_gates` hard-codes the gate thresholds (8, 0.85, 0.40, 2.0) that `kill_gates.yaml` carries. | Not changed in this block (tests pin the function signature); listed below as hygiene. |
 
-- RP-11 (D-26 table gap), see `spec/RECON-2.0.0-patches.md`.
-- `events.saddle_no = 0` convention for race-level rows: confirm or choose NULL with a non-PK surrogate.
-- `hand_charts` has no `extractor_version`/`threshold_set_version` columns by design (§9 says they MAY be NULL for human charts); the DDL omits them entirely. Confirm.
+| 2026-11-04 | C8 × §7.2 load constraint | With box heights in the sidecars the uncalibrated M6 reference detector runs during calibration and reports a candidate-load median of 5 on the scripted synthetic race (cap 4), so no grid candidate is feasible there. | Correct behaviour (the harness reports it rather than hiding it); the round-trip test relaxes only that cap to show the geometry recovery, and the scripted race is documented as non-discriminating for `cover_lat_sw` (lanes exactly 1 SW apart). A §7.2 run on real races must tune M6 inside the same search or report the load as infeasible. |
+| 2026-11-04 | C8 exporter semantics | `--human-producer` must exist for every selected race; a race without that producer refuses the whole export (all or nothing). | Kept strict; select races explicitly with `--races` when charters differ per race. |
+| 2026-11-04 | M5 × §9 payload (D2) | `classify_frame` recorded `covered` as a boolean on `UNKNOWN` rows (order-ambiguous / table-gap reasons); §9 requires NULL on `NOT_VISIBLE`/`UNKNOWN`. Found by the hypothesis shape-invariant test on its first run. | `UNKNOWN` rows now carry `covered = None`; the property test pins the rule. |
+| 2026-11-04 | RP-18 × canonical export | Pixel click columns have no quantization class in L-39 (fractions 6 dp, seconds 3 dp, SL/SW/conf 4 dp); they take the default 6 dp. | Left as the default (deterministic, harmless for clicks); noted here rather than adding a new class. |
+
+## Disposition after delegated decisions (2026-11-04)
+
+Earlier table rows are historical findings. The owner delegated the remaining verdicts; `docs/decisions/2026-11-04-continuation.md` supersedes their pending wording.
+
+- RP-11 fixed: LEADER precedence with independent cover, tested.
+- Policy EG markers/TS flag removed; real and synthetic registries now match. All draft markers bind.
+- Three OPEN markers resolved through reproducible ledger edits; optional rail/projective geometry accepted with EC-13 abstention.
+- SHOT_GAP saddle 0 and human chart version-column design retained.
+- Operator heading now references config keys rather than repeating provisional numbers.
+- Pilot cutoffs now read the selected registry, including write-back; regression changes all four cutoffs.
+- Release review fixed missing/split-mismatched held-out charts and cross-producer BREAK contamination; three regression cases added.
+- Windows isolated-promotion test now keeps UTF-8 mode in its minimal child environment.
+- Ruff conventions explicitly retain established compact reference code and mathematical names, with import bootstrapping permitted only in tools; the lambda and redundant semicolon were fixed.
+
+Remaining work is the implementation queue in the handoff plus real external evidence. No unresolved design approval is a blocker.
+
+## PR integration cleanup (2026-11-05, SPEC-2.0.0-draft)
+
+- Normalize docs-linter relative paths to POSIX before comparing with the plan-document allowlist. Windows previously treated the future typecheck target in the handoff as a missing current target.
+- Load the two repository tools dynamically after path bootstrapping in tests. This avoids E402 on older Ruff and unused-noqa failures on the newer CI Ruff; no global lint relaxation.
+- The next-session handoff starts from current main on a new branch after PR #1, rather than resuming the completed delivery branch. The next coding block and evidence gates are unchanged.
+- Rehearsal fixture paths print with POSIX separators on every platform; the Windows path-separator assertion now passes (the full run had 193 other passes).
